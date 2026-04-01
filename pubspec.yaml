@@ -1,0 +1,57 @@
+name: thyme_app
+description: AI-powered habit tracking with calm gamification - 莳光
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+    sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+    flutter:
+        sdk: flutter
+
+    # Firebase
+    firebase_core: ^3.12.1
+    firebase_auth: ^5.5.1
+    cloud_firestore: ^5.6.5
+
+    # State Management
+    provider: ^6.1.1
+
+    # UI
+    cupertino_icons: ^1.0.2
+    google_fonts: ^6.1.0
+    fl_chart: ^0.65.0
+    intl: ^0.19.0
+
+    # AI & HTTP
+    http: ^1.1.0
+    google_generative_ai: ^0.4.0
+    shared_preferences: ^2.2.2
+
+    # Audio - 花园环境音效 (鸟叫声、雨声、溪流声等)
+    audioplayers: ^6.1.0
+
+dev_dependencies:
+    flutter_test:
+        sdk: flutter
+    flutter_lints: ^3.0.0
+    flutter_launcher_icons: ^0.14.3
+
+flutter:
+    uses-material-design: true
+    assets:
+        - assets/thyme_icon_1024x1024.png
+        - assets/audio/    # 花园环境音效资源目录
+
+flutter_launcher_icons:
+    android: true
+    ios: true
+    image_path: "assets/thyme_icon_1024x1024.png"
+
+    # Android 自适应图标配置（可选但推荐）
+    adaptive_icon_background: "#B0DDB8"
+    adaptive_icon_foreground: "assets/thyme_icon_1024x1024.png"
+
+    # iOS 配置
+    remove_alpha_ios: true
