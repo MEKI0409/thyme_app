@@ -34,14 +34,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<double> _floatAnimation;
   bool _isInitialized = false; // ✅ FIXED (v3): 防止 didChangeDependencies 重复初始化
 
-  final List<Widget> _screens = [
-    const HabitTrackerScreen(),
-    const MoodJournalScreen(),
-    const GardenScreen(),
-    const KindnessChainScreen(),
-    const AICoachScreen(),
-    const AnalyticsScreen(),
-  ];
+  // ✅ FIX: 懒加载子页面，避免一次性实例化所有 screen（含 Gemini、音频等重资源）
+  Widget _buildScreen(int index) {
+    switch (index) {
+      case 0: return const HabitTrackerScreen();
+      case 1: return const MoodJournalScreen();
+      case 2: return const GardenScreen();
+      case 3: return const KindnessChainScreen();
+      case 4: return const AICoachScreen();
+      case 5: return const AnalyticsScreen();
+      default: return const HabitTrackerScreen();
+    }
+  }
 
   final List<_NavItem> _navItems = [
     _NavItem('Habits', 'habits', Icons.spa_outlined, Icons.spa),
@@ -112,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Scaffold(
       backgroundColor: CuteTheme.warmWhite,
       appBar: _buildCuteAppBar(),
-      body: _screens[_selectedIndex],
+      body: _buildScreen(_selectedIndex),
       bottomNavigationBar: _buildCuteBottomNav(),
     );
   }

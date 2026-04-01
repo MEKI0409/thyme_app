@@ -357,7 +357,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your email';
                 }
-                if (!value.contains('@')) {
+                // ✅ FIX: 更严格的邮箱格式验证
+                final emailRegex = RegExp(r'^[\w\-.+]+@[\w\-]+\.[\w\-]{2,}$');
+                if (!emailRegex.hasMatch(value.trim())) {
                   return 'Please enter a valid email';
                 }
                 return null;

@@ -1,17 +1,12 @@
 // widgets/cute_widgets.dart
 // 🌸 Thyme App 公共组件库
-// 统一的可爱风格组件，减少代码重复
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../utils/theme.dart';
 import 'cute_garden_icons.dart';
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 🎴 CuteCard - 统一卡片组件
-// ═══════════════════════════════════════════════════════════════════════════════
 
-/// 可爱风格卡片
 class CuteCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -82,7 +77,6 @@ class CuteCard extends StatelessWidget {
   }
 }
 
-/// 渐变卡片变体
 class CuteGradientCard extends StatelessWidget {
   final Widget child;
   final List<Color> colors;
@@ -119,11 +113,7 @@ class CuteGradientCard extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// ⏳ CuteLoadingWidget - 统一加载状态
-// ═══════════════════════════════════════════════════════════════════════════════
-
-/// 可爱的加载动画
+//animation
 class CuteLoadingWidget extends StatefulWidget {
   final String? message;
   final double size;
@@ -243,7 +233,6 @@ class CuteLoadingIndicator extends StatelessWidget {
 // 📭 CuteEmptyState - 统一空状态提示
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// 空状态提示组件
 class CuteEmptyState extends StatelessWidget {
   final Widget? icon;
   final String? emoji;
@@ -329,7 +318,6 @@ class CuteEmptyState extends StatelessWidget {
 // 💧☀️ CuteResourceDisplay - 资源显示组件
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// 资源显示组件（水滴+阳光）
 class CuteResourceDisplay extends StatelessWidget {
   final int waterDrops;
   final int sunlightPoints;
@@ -451,8 +439,6 @@ class CuteRewardDisplay extends StatelessWidget {
 // 🎉 CuteRewardPopup - 奖励弹窗
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// 显示奖励弹窗
-/// ✅ FIXED: 使用 _dismissed flag 防止双重 pop 竞态条件
 class CuteRewardPopup {
   static void show(
       BuildContext context, {
@@ -520,16 +506,16 @@ class _RewardPopupContent extends StatefulWidget {
 }
 
 class _RewardPopupContentState extends State<_RewardPopupContent> {
-  bool _dismissed = false; // ✅ 防止多次关闭
+  bool _dismissed = false;
 
   @override
   void initState() {
     super.initState();
-    // 自动关闭定时器
+    // 關閉定時器
     Future.delayed(widget.autoCloseDuration, _safeDismiss);
   }
 
-  // ✅ 安全关闭方法，确保只调用一次
+  // 確保只調用一次
   void _safeDismiss() {
     if (!mounted || _dismissed) return;
     _dismissed = true;
@@ -539,7 +525,7 @@ class _RewardPopupContentState extends State<_RewardPopupContent> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _safeDismiss, // ✅ 点击也可关闭
+      onTap: _safeDismiss, // 點擊可關閉
       behavior: HitTestBehavior.opaque,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 40),
@@ -654,10 +640,9 @@ class _RewardPopupContentState extends State<_RewardPopupContent> {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 🔘 CuteButton - 统一按钮组件
+// 🔘 CuteButton - 按鈕組件
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// 可爱风格按钮
 class CuteButton extends StatelessWidget {
   final String text;
   final Widget? icon;
@@ -742,7 +727,7 @@ class CuteButton extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 📝 CuteInputField - 统一输入框
+// 📝 CuteInputField - 輸入框
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /// 可爱风格输入框
@@ -817,10 +802,9 @@ class CuteInputField extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 🏷️ CuteChip - 标签组件
+// 🏷️ CuteChip - 標簽組件
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// 可爱风格标签
 class CuteChip extends StatelessWidget {
   final String text;
   final Widget? icon;
@@ -871,10 +855,9 @@ class CuteChip extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 💬 CuteSnackBar - 统一提示条
+// 💬 CuteSnackBar - 提示條
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// 显示可爱风格的 SnackBar
 class CuteSnackBar {
   static void show(
       BuildContext context, {
@@ -920,10 +903,9 @@ class CuteSnackBar {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 🔲 CuteDivider - 分隔线
+// 🔲 CuteDivider - 分割線
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// 可爱风格分隔线
 class CuteDivider extends StatelessWidget {
   final double? height;
   final EdgeInsetsGeometry? margin;
@@ -952,10 +934,10 @@ class CuteDivider extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 📊 CuteProgressBar - 进度条
+// 📊 CuteProgressBar - 進度條
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// 可爱风格进度条
+
 class CuteProgressBar extends StatelessWidget {
   final double progress;
   final double height;
@@ -998,10 +980,9 @@ class CuteProgressBar extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 🎭 CuteAvatar - 头像组件
+// 🎭 CuteAvatar - 頭像組件
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// 可爱风格头像
 class CuteAvatar extends StatelessWidget {
   final String? name;
   final String? emoji;

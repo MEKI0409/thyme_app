@@ -52,6 +52,21 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
   void _showProfileMenu() {
     final authController = Provider.of<AuthController>(context, listen: false);
     final user = authController.userModel;
+    final firebaseUser = authController.currentUser;
+    final photoUrl = firebaseUser?.photoURL;
+
+    // ✅ FIXED: 读取 emoji 头像
+    String avatarDisplay;
+    bool isEmoji = false;
+    if (photoUrl != null && photoUrl.startsWith('emoji:')) {
+      avatarDisplay = photoUrl.replaceFirst('emoji:', '');
+      isEmoji = true;
+    } else if (user?.displayName?.isNotEmpty == true) {
+      avatarDisplay = user!.displayName![0].toUpperCase();
+    } else {
+      avatarDisplay = '🌿';
+      isEmoji = true;
+    }
 
     showModalBottomSheet(
       context: context,
@@ -109,12 +124,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                     ),
                     child: Center(
                       child: Text(
-                        user?.displayName?.isNotEmpty == true
-                            ? user!.displayName![0].toUpperCase()
-                            : '🌿',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
+                        avatarDisplay,
+                        style: TextStyle(
+                          color: isEmoji ? null : Colors.white,
+                          fontSize: isEmoji ? 28 : 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -440,27 +453,56 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                 actions: [
                   Padding(
                     padding: const EdgeInsets.only(right: 16, top: 8),
-                    child: GestureDetector(
-                      onTap: _showProfileMenu,
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withValues(alpha: 0.15),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
+                    child: Consumer<AuthController>(
+                      builder: (context, authController, _) {
+                        final user = authController.currentUser;
+                        final photoUrl = user?.photoURL;
+                        final displayName = authController.userModel?.displayName
+                            ?? user?.displayName
+                            ?? '';
+
+                        // ✅ FIXED: 读取 emoji 头像
+                        String avatarDisplay;
+                        bool isEmoji = false;
+                        if (photoUrl != null && photoUrl.startsWith('emoji:')) {
+                          avatarDisplay = photoUrl.replaceFirst('emoji:', '');
+                          isEmoji = true;
+                        } else if (displayName.isNotEmpty) {
+                          avatarDisplay = displayName[0].toUpperCase();
+                        } else {
+                          avatarDisplay = '🌿';
+                          isEmoji = true;
+                        }
+
+                        return GestureDetector(
+                          onTap: _showProfileMenu,
+                          child: Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withValues(alpha: 0.15),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.person_outline_rounded,
-                          color: CuteTheme.primaryColor,
-                          size: 24,
-                        ),
-                      ),
+                            child: Center(
+                              child: Text(
+                                avatarDisplay,
+                                style: TextStyle(
+                                  fontSize: isEmoji ? 22 : 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: isEmoji ? null : CuteTheme.primaryColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ],

@@ -47,12 +47,23 @@ class _AICoachScreenState extends State<AICoachScreen>
   static const String _spiritName = 'Fern';
   static const String _spiritEmoji = '🌿';
 
+  bool _isInitialized = false; // ✅ FIX: 防止 didChangeDependencies 重复调用
+
   @override
   void initState() {
     super.initState();
     _initAnimations();
-    _addWelcomeMessage();
     _checkServiceStatus();
+  }
+
+  // ✅ FIX: 从 initState 移到 didChangeDependencies，安全使用 context.read
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      _isInitialized = true;
+      _addWelcomeMessage();
+    }
   }
 
   void _initAnimations() {

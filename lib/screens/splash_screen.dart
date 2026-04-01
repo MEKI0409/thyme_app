@@ -53,33 +53,25 @@ class _SplashScreenState extends State<SplashScreen>
     _iconController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
-    )..addListener(() {
-      if (mounted) setState(() {});
-    });
+    );
 
     // Clock hand animation (loop)
     _clockController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
-    )..addListener(() {
-      if (mounted) setState(() {});
-    });
+    );
 
     // Text fade in animation
     _textController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
-    )..addListener(() {
-      if (mounted) setState(() {});
-    });
+    );
 
     // Overall fade out animation
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
-    )..addListener(() {
-      if (mounted) setState(() {});
-    });
+    );
 
     // Icon scale - elastic appear
     _iconScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -190,46 +182,52 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: _fadeOutAnimation.value,
-      child: Scaffold(
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: CuteTheme.primaryGradient,
-          ),
-          child: SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(flex: 2),
+    // ✅ FIX: 用 ListenableBuilder 替代 addListener+setState，避免全量重建
+    return ListenableBuilder(
+      listenable: Listenable.merge([_fadeController, _iconController, _textController, _clockController]),
+      builder: (context, _) {
+        return Opacity(
+          opacity: _fadeOutAnimation.value,
+          child: Scaffold(
+            body: Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: const BoxDecoration(
+                gradient: CuteTheme.primaryGradient,
+              ),
+              child: SafeArea(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Spacer(flex: 2),
 
-                // Thyme wreath + clock icon
-                _buildThymeIcon(),
+                    // Thyme wreath + clock icon
+                    _buildThymeIcon(),
 
-                const SizedBox(height: 48),
+                    const SizedBox(height: 48),
 
-                // App name
-                _buildTitle(),
+                    // App name
+                    _buildTitle(),
 
-                const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                // Slogan
-                _buildSlogan(),
+                    // Slogan
+                    _buildSlogan(),
 
-                const Spacer(flex: 3),
+                    const Spacer(flex: 3),
 
-                // Bottom decoration
-                _buildBottomDecoration(),
+                    // Bottom decoration
+                    _buildBottomDecoration(),
 
-                const SizedBox(height: 40),
-              ],
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-    );
+        ); // closes Opacity
+      }, // closes builder
+    ); // closes ListenableBuilder
   }
 
   Widget _buildThymeIcon() {
@@ -538,7 +536,6 @@ class _ThymeIconPainter extends CustomPainter {
       minuteHandPaint,
     );
 
-    // Center dot
     final centerDotPaint = Paint()
       ..color = CuteTheme.primaryGreen
       ..style = PaintingStyle.fill;

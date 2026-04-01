@@ -405,12 +405,12 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     setState(() {
                       _selectedAvatar = emoji;
                     });
-                    // ✅ FIXED (v3): 异步操作前检查 mounted
-                    if (!mounted) return;
-                    await context.read<SettingsController>().updatePhotoUrl('emoji:$emoji');
-                    // ✅ 通知 AuthController 刷新
-                    if (!mounted) return;
-                    await context.read<AuthController>().reloadUser();
+                    // ✅ FIXED (v4): 在 async 操作前捕获 controller 引用
+                    // 即使 widget 被 unmount，保存和刷新仍能完成
+                    final settingsCtrl = context.read<SettingsController>();
+                    final authCtrl = context.read<AuthController>();
+                    await settingsCtrl.updatePhotoUrl('emoji:$emoji');
+                    await authCtrl.reloadUser();
                   },
                   child: Container(
                     decoration: BoxDecoration(

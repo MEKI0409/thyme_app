@@ -120,7 +120,7 @@ class _WelcomeBackScreenState extends State<WelcomeBackScreen>
                   const SizedBox(height: 16),
                   _buildStatusCard(gardenStatus),
                   const SizedBox(height: 24),
-                  if (restBonus['water']! > 0 || restBonus['sunlight']! > 0)
+                  if ((restBonus['water'] ?? 0) > 0 || (restBonus['sunlight'] ?? 0) > 0)
                     _buildRestBonusCard(restBonus),
                   const SizedBox(height: 20),
                   _buildAffirmation(affirmation),
@@ -368,16 +368,16 @@ class _WelcomeBackScreenState extends State<WelcomeBackScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (bonus['water']! > 0)
+              if ((bonus['water'] ?? 0) > 0)
                 _buildBonusItem('💧', '+${bonus['water']}', 'Water', CuteTheme.waterBlue),
-              if (bonus['water']! > 0 && bonus['sunlight']! > 0)
+              if ((bonus['water'] ?? 0) > 0 && (bonus['sunlight'] ?? 0) > 0)
                 Container(
                   width: 1,
                   height: 40,
                   margin: const EdgeInsets.symmetric(horizontal: 24),
                   color: CuteTheme.borderLight,
                 ),
-              if (bonus['sunlight']! > 0)
+              if ((bonus['sunlight'] ?? 0) > 0)
                 _buildBonusItem('☀️', '+${bonus['sunlight']}', 'Sunlight', CuteTheme.warmOrange),
             ],
           ),
