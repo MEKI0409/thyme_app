@@ -477,7 +477,6 @@ class ResourceIndicator extends StatelessWidget {
   }
 }
 
-/// ✅ NEW: Streak display with gentle messaging
 class GentleStreakDisplay extends StatelessWidget {
   final int currentStreak;
   final int longestStreak;
@@ -547,7 +546,7 @@ class GentleStreakDisplay extends StatelessWidget {
     );
   }
 
-  // ✅ Calm Gamification: No pressure, just gentle acknowledgment
+  // alm Gamification: No pressure, just gentle acknowledgment
   String _getStreakMessage(int current, int longest) {
     if (current == 0) {
       return 'Every moment is a fresh start 🌱';

@@ -5,7 +5,6 @@ import 'dart:math';
 class JournalPromptsService {
   static final Random _random = Random();
 
-  /// Get gentle journal prompts - never demanding, always inviting
   static List<String> getGentlePrompts() {
     return [
       "What's on your mind right now? No need to organize your thoughts.",
@@ -31,7 +30,6 @@ class JournalPromptsService {
     return prompts[_random.nextInt(prompts.length)];
   }
 
-  /// Get prompt based on mood - supportive, not prescriptive
   static String getPromptForMood(String? mood) {
     switch (mood?.toLowerCase()) {
       case 'anxious':
@@ -93,7 +91,6 @@ class JournalPromptsService {
     return responses[_random.nextInt(responses.length)];
   }
 
-  /// Get prompts for specific situations (gentle invitations)
   static String getMorningPrompt() {
     final prompts = [
       "How did you sleep? How are you entering this day?",
@@ -123,9 +120,7 @@ class JournalPromptsService {
     ];
   }
 
-  /// Check if prompt should be shown
   static bool shouldShowPrompt(DateTime? lastJournalEntry) {
-    // Don't prompt if they just journaled
     if (lastJournalEntry != null) {
       final hoursSince = DateTime.now().difference(lastJournalEntry).inHours;
       if (hoursSince < 4) return false;
@@ -133,7 +128,6 @@ class JournalPromptsService {
     return true;
   }
 
-  /// Get a gentle nudge
   static String? getGentleNudge(int daysSinceLastEntry) {
     if (daysSinceLastEntry <= 1) return null;
 

@@ -3,8 +3,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-/// Main reward celebration widget
-/// Shows floating particles and gentle acknowledgment
 class RewardCelebration extends StatefulWidget {
   final int waterDrops;
   final int sunlightPoints;
@@ -23,7 +21,6 @@ class RewardCelebration extends StatefulWidget {
     this.displayDuration = const Duration(milliseconds: 2500),
   }) : super(key: key);
 
-  /// Show reward celebration as an overlay
   static void show(
       BuildContext context, {
         required int waterDrops,
@@ -572,7 +569,6 @@ class _RewardParticlePainter extends CustomPainter {
   }
 }
 
-/// Floating reward indicator - shows briefly inline (for less intrusive feedback)
 class FloatingRewardIndicator extends StatefulWidget {
   final int waterDrops;
   final int sunlightPoints;
@@ -684,7 +680,7 @@ class _FloatingRewardIndicatorState extends State<FloatingRewardIndicator>
   }
 }
 
-/// Gentle ripple effect for resource collection
+
 class ResourceRipple extends StatefulWidget {
   final Color color;
   final double size;

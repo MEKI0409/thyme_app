@@ -149,7 +149,6 @@ class _SunlightPainter extends CustomPainter {
     final bodyPaint = Paint()..color = color;
     canvas.drawCircle(center, radius, bodyPaint);
 
-    // 简单腮红 - 两个小椭圆
     final blushPaint = Paint()..color = GardenColors.softPink.withValues(alpha: 0.5);
     canvas.drawOval(
       Rect.fromCenter(
@@ -236,7 +235,6 @@ class _SeedlingPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // 花盆
     final potPaint = Paint()..color = const Color(0xFFE8C9A0);
     final potPath = Path();
     potPath.moveTo(w * 0.25, h * 0.7);
@@ -885,7 +883,6 @@ class _TreePainter extends CustomPainter {
     trunk.close();
     canvas.drawPath(trunk, trunkPaint);
 
-    // 樹幹紋理
     final barkPaint = Paint()
       ..color = const Color(0xFF8B6E4E).withValues(alpha: 0.5)
       ..strokeWidth = w * 0.015
@@ -894,7 +891,6 @@ class _TreePainter extends CustomPainter {
     canvas.drawLine(Offset(w * 0.52, h * 0.62), Offset(w * 0.5, h * 0.85), barkPaint);
     canvas.drawLine(Offset(w * 0.58, h * 0.6), Offset(w * 0.56, h * 0.78), barkPaint);
 
-    // 树枝
     final branchPaint = Paint()
       ..color = const Color(0xFFB8956E)
       ..strokeWidth = w * 0.04
@@ -1328,7 +1324,7 @@ class PlantLevelIcon extends StatelessWidget {
 }
 
 class AnimatedResourceIcon extends StatefulWidget {
-  final String type; // 'water' or 'sunlight'
+  final String type;
   final double size;
 
   const AnimatedResourceIcon({
@@ -1686,7 +1682,6 @@ class _KindnessIconPainter extends CustomPainter {
       oldDelegate.color != color || oldDelegate.isActive != isActive;
 }
 
-/// AI精灵图标 - 小精灵
 class CuteFernIcon extends StatelessWidget {
   final double size;
   final Color? color;
@@ -1841,8 +1836,6 @@ class _JourneyIconPainter extends CustomPainter {
 }
 
 
-
-/// 心情圖標
 class CuteMoodEmoji extends StatelessWidget {
   final String mood;
   final double size;
@@ -2133,7 +2126,6 @@ class _MoodEmojiPainter extends CustomPainter {
       oldDelegate.mood != mood;
 }
 
-
 // 習慣類別圖標
 
 class CuteCategoryIcon extends StatelessWidget {
@@ -2330,11 +2322,10 @@ class _CategoryIconPainter extends CustomPainter {
       oldDelegate.category != category || oldDelegate.customColor != customColor;
 }
 
-
 // 工具方法 - 根据类型获取图标
 
 class CuteNavIcon extends StatelessWidget {
-  final String type; // habits, mood, garden, kindness, fern, journey
+  final String type;
   final double size;
   final bool isActive;
 

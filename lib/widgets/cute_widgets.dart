@@ -1,5 +1,4 @@
 // widgets/cute_widgets.dart
-// 🌸 Thyme App 公共組件库
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -446,7 +445,7 @@ class CuteRewardPopup {
       }) {
     showGeneralDialog(
       context: context,
-      barrierDismissible: false, // ✅ 改为 false，防止与 onTap/autoClose 竞争
+      barrierDismissible: false,
       barrierLabel: 'Dismiss',
       barrierColor: Colors.black.withValues(alpha: 0.3),
       transitionDuration: const Duration(milliseconds: 400),
@@ -634,7 +633,6 @@ class _RewardPopupContentState extends State<_RewardPopupContent> {
 }
 
 // 按鈕組件
-
 
 class CuteButton extends StatelessWidget {
   final String text;

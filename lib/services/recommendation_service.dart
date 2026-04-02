@@ -19,7 +19,6 @@ class RecommendationService {
     return recommendedHabits.take(3).toList();
   }
 
-  /// ✅ IMPROVED: Calm, non-pressuring messages
   String getRecommendationMessage(String mood) {
     final messages = {
       'anxious':
@@ -49,7 +48,6 @@ class RecommendationService {
     return messages[mood] ?? 'Here are some gentle options for today:';
   }
 
-  /// Reflective quotes instead of motivational
   String getReflectiveQuote(String mood) {
     final quotes = {
       'anxious':
@@ -79,7 +77,6 @@ class RecommendationService {
     return quotes[mood] ?? '"This moment is enough." - A gentle reminder';
   }
 
-  /// Get gentle encouragement (not motivation)
   String getGentleEncouragement(String mood) {
     final encouragements = {
       'anxious': 'Your garden is a safe space. Take all the time you need.',
@@ -98,7 +95,6 @@ class RecommendationService {
     return encouragements[mood] ?? 'You\'re doing just fine. 💚';
   }
 
-  /// Get activity suggestions based on energy level (not mood)
   List<String> getEnergyBasedSuggestions(String energyLevel) {
     switch (energyLevel.toLowerCase()) {
       case 'low':
@@ -130,31 +126,25 @@ class RecommendationService {
     }
   }
 
-  /// Check if recommendation should be shown
-  /// (Respects user's space - doesn't always push recommendations)
   bool shouldShowRecommendation(
       String? currentMood,
       DateTime? lastActivityTime,
       int habitsCompletedToday,
       ) {
-    // Don't recommend if user just completed something
     if (lastActivityTime != null) {
       final minutesSince = DateTime.now().difference(lastActivityTime).inMinutes;
       if (minutesSince < 30) return false;
     }
 
-    // Don't overwhelm - limit daily recommendations
     if (habitsCompletedToday >= 3) return false;
 
-    // For stressed/anxious moods, be more conservative
     if (currentMood == 'anxious' || currentMood == 'stressed') {
-      return false; // Let them initiate
+      return false;
     }
 
     return true;
   }
 
-  /// Get time-appropriate suggestions
   String getTimeBasedMessage() {
     final hour = DateTime.now().hour;
 

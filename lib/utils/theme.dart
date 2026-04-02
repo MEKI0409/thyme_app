@@ -61,7 +61,7 @@ class AppTheme {
   static const Color sunlightColor = Color(0xFFFFCC80);
   static const Color sunnyYellow = Color(0xFFFFE082);
 
-  // 📐 Spacing
+  // Spacing
 
   static const double spacingXS = 4.0;
   static const double spacingS = 8.0;
@@ -71,7 +71,7 @@ class AppTheme {
   static const double spacingXXL = 48.0;
 
 
-  // 🔵 Border Radius - More rounded and cute
+  // Border Radius
 
   static const double radiusS = 12.0;
   static const double radiusSmall = 12.0;
@@ -83,7 +83,7 @@ class AppTheme {
   static const double radiusXLarge = 32.0;
   static const double radiusRound = 100.0;
 
-  // 🎨 Gradients
+  // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -104,7 +104,7 @@ class AppTheme {
     ],
   );
 
-  // 💫 Shadows
+  // Shadows
   static List<BoxShadow> get cardShadow => [
     BoxShadow(
       color: primaryColor.withValues(alpha: 0.08),
