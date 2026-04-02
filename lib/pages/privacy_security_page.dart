@@ -1,9 +1,4 @@
 // pages/privacy_security_page.dart
-// 隐私与安全设置页面 🔒
-// ✅ FIXED: isVerified 从 AuthController 读取，reloadUser() 后 UI 自动更新
-// ✅ FIXED: _changePassword 中重复的 clearMessages() 调用
-// ✅ FIXED: sendEmailVerification() 改为从 authController 调用（而非 settingsController）
-// ✅ FIXED (v2): _showDeleteAccountDialog 重置所有对话框状态
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +13,6 @@ class PrivacySecurityPage extends StatefulWidget {
 }
 
 class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
-  // 密码表单
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -26,12 +20,10 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
   bool _showNewPassword = false;
   bool _isPasswordSectionExpanded = false;
 
-  // 删除账户表单
   final _deletePasswordController = TextEditingController();
   bool _showDeletePassword = false;
   bool _deleteConfirmed = false;
 
-  // 邮箱验证
   bool _isCheckingVerification = false;
 
   @override
@@ -47,7 +39,6 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
   Widget build(BuildContext context) {
     final controller = context.watch<SettingsController>();
 
-    // ✅ FIXED: 从 AuthController 读取，reloadUser() 后自动 rebuild
     final authController = context.watch<AuthController>();
     final isVerified = authController.isEmailVerified;
 
@@ -89,10 +80,6 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 邮箱验证卡片
-  // ✅ FIXED: sendEmailVerification() 改为从 authController 调用
-  // ═══════════════════════════════════════════════════════════════════════════
 
   Widget _buildEmailVerificationCard(
       SettingsController controller,
@@ -191,7 +178,6 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    // ✅ FIXED: 改为 authController.sendEmailVerification()
                     onPressed: controller.isLoading
                         ? null
                         : () async {
@@ -231,14 +217,12 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                // ✅ FIXED: 刷新后调用 authController.reloadUser()，UI 自动更新
                 OutlinedButton.icon(
                   onPressed: _isCheckingVerification
                       ? null
                       : () async {
                     setState(() => _isCheckingVerification = true);
 
-                    // ✅ 通过 AuthController 刷新，触发全局 rebuild
                     await authController.reloadUser();
                     final verified = authController.isEmailVerified;
 
@@ -289,9 +273,6 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 修改密码卡片
-  // ═══════════════════════════════════════════════════════════════════════════
 
   Widget _buildChangePasswordCard(SettingsController controller) {
     return Container(
@@ -473,10 +454,6 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 删除账户卡片
-  // ═══════════════════════════════════════════════════════════════════════════
-
   Widget _buildDeleteAccountCard(SettingsController controller) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -570,12 +547,8 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 操作方法
-  // ═══════════════════════════════════════════════════════════════════════════
 
   Future<void> _changePassword(SettingsController controller) async {
-    // ✅ FIXED: 只在开头调用一次 clearMessages()，删除重复调用
     controller.clearMessages();
 
     final current = _currentPasswordController.text;
@@ -618,10 +591,9 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
   }
 
   void _showDeleteAccountDialog(SettingsController controller) {
-    // ✅ FIXED (v2): 重置所有对话框状态，包括 _showDeletePassword
     _deletePasswordController.clear();
     _deleteConfirmed = false;
-    _showDeletePassword = false; // ✅ FIXED (v2): 之前漏了这个重置
+    _showDeletePassword = false;
 
     showDialog(
       context: context,
@@ -762,9 +734,7 @@ class _PrivacySecurityPageState extends State<PrivacySecurityPage> {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // UI 辅助
-  // ═══════════════════════════════════════════════════════════════════════════
+  // UI 輔助
 
   Widget _buildSectionLabel(String label) {
     return Padding(

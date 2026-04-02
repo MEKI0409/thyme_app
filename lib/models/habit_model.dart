@@ -1,6 +1,4 @@
 // models/habit_model.dart
-// ✅ IMPROVED: Better streak calculation, edge case handling, documentation
-// ✅ FIXED: Removed debug print statements
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
@@ -12,12 +10,11 @@ class Habit {
   final String description;
   final String category;
   final List<DateTime> completedDates;
-  final List<DateTime> rewardedDates; // ✅ Anti-exploit: tracks rewarded dates separately
+  final List<DateTime> rewardedDates;
   final DateTime createdAt;
   int currentStreak;
   int longestStreak;
 
-  // Optional fields for enhanced tracking
   final String? reminderTime;
   final bool isArchived;
   final Map<String, dynamic>? metadata;
@@ -40,14 +37,12 @@ class Habit {
 
   factory Habit.fromMap(Map<String, dynamic> map, String id) {
     try {
-      // Parse completed dates safely
       List<DateTime> parsedDates = [];
       if (map['completedDates'] != null) {
         final dates = map['completedDates'] as List<dynamic>;
         parsedDates = dates.map((date) => _parseDateTime(date)).toList();
       }
 
-      // Parse rewarded dates safely
       List<DateTime> parsedRewardedDates = [];
       if (map['rewardedDates'] != null) {
         final dates = map['rewardedDates'] as List<dynamic>;
@@ -72,7 +67,6 @@ class Habit {
             : null,
       );
     } catch (e, stackTrace) {
-      // ✅ FIXED: Use debugPrint instead of print (only shows in debug mode)
       if (kDebugMode) {
         debugPrint('❌ Error in Habit.fromMap: $e');
         debugPrint('Stack trace: $stackTrace');
@@ -81,7 +75,6 @@ class Habit {
     }
   }
 
-  /// Safe DateTime parsing
   static DateTime _parseDateTime(dynamic value) {
     if (value == null) return DateTime.now();
 
@@ -119,29 +112,24 @@ class Habit {
     };
   }
 
-  /// Check if completed today (timezone-aware)
   bool isCompletedToday() {
     final today = DateTime.now();
     return completedDates.any((date) => _isSameDay(date, today));
   }
 
-  /// Check if rewarded today (anti-exploit)
   bool isRewardedToday() {
     final today = DateTime.now();
     return rewardedDates.any((date) => _isSameDay(date, today));
   }
 
-  /// Check if can claim reward (completed but not yet rewarded today)
   bool canClaimReward() {
     return isCompletedToday() && !isRewardedToday();
   }
 
-  /// Check if completed on a specific date
   bool isCompletedOnDate(DateTime date) {
     return completedDates.any((d) => _isSameDay(d, date));
   }
 
-  /// Get completion count for current week
   int get weeklyCompletionCount {
     final now = DateTime.now();
     final weekStart = now.subtract(Duration(days: now.weekday - 1));
@@ -150,7 +138,6 @@ class Habit {
         .length;
   }
 
-  /// Get completion count for current month
   int get monthlyCompletionCount {
     final now = DateTime.now();
     return completedDates
@@ -158,12 +145,10 @@ class Habit {
         .length;
   }
 
-  /// Calculate completion rate (percentage)
   double get completionRate {
     final daysSinceCreation = DateTime.now().difference(createdAt).inDays + 1;
     if (daysSinceCreation <= 0) return 0.0;
 
-    // Count unique days completed
     final uniqueDays = completedDates
         .map((d) => DateTime(d.year, d.month, d.day))
         .toSet()
@@ -172,7 +157,6 @@ class Habit {
     return (uniqueDays / daysSinceCreation).clamp(0.0, 1.0);
   }
 
-  /// Get days since last completion
   int? get daysSinceLastCompletion {
     if (completedDates.isEmpty) return null;
 
@@ -182,13 +166,11 @@ class Habit {
     return DateTime.now().difference(sortedDates.first).inDays;
   }
 
-  /// Check if habit is at risk (not completed recently)
   bool get isAtRisk {
     final days = daysSinceLastCompletion;
     return days != null && days > 2 && currentStreak > 0;
   }
 
-  /// Get category emoji
   String get categoryEmoji {
     switch (category) {
       case 'Mindfulness':
@@ -208,7 +190,6 @@ class Habit {
     }
   }
 
-  /// Get streak emoji based on length
   String get streakEmoji {
     if (currentStreak == 0) return '';
     if (currentStreak < 3) return '🔥';
@@ -218,7 +199,6 @@ class Habit {
     return '🏆';
   }
 
-  /// Helper: Check if two dates are the same day
   static bool _isSameDay(DateTime date1, DateTime date2) {
     return date1.year == date2.year &&
         date1.month == date2.month &&

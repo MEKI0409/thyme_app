@@ -1,11 +1,8 @@
 // models/chat_message_model.dart
-// ✅ IMPROVED: Added id, status, copyWith, better structure
-// ✅ FIXED (v2): _generateId 使用随机数避免 Web 平台碰撞
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 
-/// Message status enum
 enum MessageStatus {
   sending,
   sent,
@@ -19,8 +16,8 @@ class ChatMessage {
   final bool isUser;
   final DateTime timestamp;
   final MessageStatus status;
-  final String? errorMessage; // ✅ NEW: Store error if failed
-  final Map<String, dynamic>? metadata; // ✅ NEW: Additional data
+  final String? errorMessage;
+  final Map<String, dynamic>? metadata;
 
   ChatMessage({
     String? id,
@@ -32,8 +29,6 @@ class ChatMessage {
     this.metadata,
   }) : id = id ?? _generateId();
 
-  /// ✅ FIXED (v2): 使用 milliseconds + 随机数生成唯一 ID
-  /// 原实现在 Web 平台 microsecondsSinceEpoch 精度不足会碰撞
   static final _random = Random();
   static String _generateId() {
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -41,7 +36,6 @@ class ChatMessage {
     return '${now}_$rand';
   }
 
-  /// ✅ FIXED: Safe parsing from Firestore
   factory ChatMessage.fromMap(Map<String, dynamic> map, [String? docId]) {
     return ChatMessage(
       id: docId ?? map['id'] ?? _generateId(),
@@ -56,7 +50,6 @@ class ChatMessage {
     );
   }
 
-  /// ✅ NEW: Safe DateTime parsing
   static DateTime _parseDateTime(dynamic value) {
     if (value == null) return DateTime.now();
 
@@ -75,7 +68,6 @@ class ChatMessage {
     return DateTime.now();
   }
 
-  /// ✅ NEW: Parse status from string
   static MessageStatus _parseStatus(dynamic value) {
     if (value == null) return MessageStatus.sent;
     if (value is MessageStatus) return value;
@@ -108,7 +100,6 @@ class ChatMessage {
     };
   }
 
-  /// ✅ NEW: copyWith method
   ChatMessage copyWith({
     String? id,
     String? text,
@@ -129,7 +120,6 @@ class ChatMessage {
     );
   }
 
-  /// ✅ NEW: Create a user message
   factory ChatMessage.user(String text) {
     return ChatMessage(
       text: text,
@@ -139,7 +129,6 @@ class ChatMessage {
     );
   }
 
-  /// ✅ NEW: Create an AI message
   factory ChatMessage.ai(String text) {
     return ChatMessage(
       text: text,
@@ -149,7 +138,6 @@ class ChatMessage {
     );
   }
 
-  /// ✅ NEW: Create a sending message (for optimistic UI)
   factory ChatMessage.sending(String text) {
     return ChatMessage(
       text: text,
@@ -159,7 +147,6 @@ class ChatMessage {
     );
   }
 
-  /// ✅ NEW: Create a failed message
   factory ChatMessage.failed(String text, String error) {
     return ChatMessage(
       text: text,
@@ -170,13 +157,10 @@ class ChatMessage {
     );
   }
 
-  /// ✅ NEW: Check if message is sending
   bool get isSending => status == MessageStatus.sending;
 
-  /// ✅ NEW: Check if message failed
   bool get isFailed => status == MessageStatus.failed;
 
-  /// ✅ NEW: Get formatted timestamp
   String get formattedTime {
     final hour = timestamp.hour.toString().padLeft(2, '0');
     final minute = timestamp.minute.toString().padLeft(2, '0');

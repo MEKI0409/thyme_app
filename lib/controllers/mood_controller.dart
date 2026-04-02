@@ -13,7 +13,6 @@ class MoodController extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
-  // ✅ 修复：保存订阅以便取消
   StreamSubscription? _moodEntriesSubscription;
 
   List<MoodEntry> get moodEntries => _moodEntries;
@@ -28,7 +27,6 @@ class MoodController extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    // ✅ 修复：取消之前的订阅
     _moodEntriesSubscription?.cancel();
 
     _moodEntriesSubscription = _firebaseService.getMoodEntriesForUser(userId).listen(
@@ -69,14 +67,14 @@ class MoodController extends ChangeNotifier {
 
       final detectedMood = sentimentResult['mood'] ?? 'neutral';
       final sentimentScore = sentimentResult['score'] ?? 0.0;
-      final confidence = sentimentResult['confidence'] ?? 0.5; // ✅ FIXED: 读取 confidence
+      final confidence = sentimentResult['confidence'] ?? 0.5;
 
       final moodData = {
         'userId': userId,
         'journalText': journalText,
         'detectedMood': detectedMood,
         'sentimentScore': sentimentScore,
-        'confidence': confidence, // ✅ FIXED: 写入 confidence
+        'confidence': confidence,
         'createdAt': DateTime.now().toIso8601String(),
       };
 
@@ -92,7 +90,7 @@ class MoodController extends ChangeNotifier {
         journalText: journalText,
         detectedMood: detectedMood,
         sentimentScore: (sentimentScore as num).toDouble(),
-        confidence: (confidence as num).toDouble(), // ✅ FIXED: 传入 confidence
+        confidence: (confidence as num).toDouble(),
         createdAt: DateTime.now(),
       );
     } catch (e) {
@@ -128,7 +126,6 @@ class MoodController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ✅ 修复：正确取消订阅
   @override
   void dispose() {
     _moodEntriesSubscription?.cancel();

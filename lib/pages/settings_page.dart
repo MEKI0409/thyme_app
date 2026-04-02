@@ -1,6 +1,4 @@
 // pages/settings_page.dart
-// 设置主页面 ⚙️
-// ✅ ADDED: 未验证邮箱时显示温柔提示 banner
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,11 +17,9 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  // ✅ NEW: 控制 banner 发送中状态
   bool _isSendingVerification = false;
-  bool _isInitialized = false; // ✅ FIXED (v3): 防止重复初始化
+  bool _isInitialized = false;
 
-  // ✅ FIXED (v3): 从 initState 移到 didChangeDependencies，安全使用 context
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -46,7 +42,6 @@ class _SettingsPageState extends State<SettingsPage> {
     final user = authController.currentUser;
     final userModel = authController.userModel;
 
-    // ✅ 从 AuthController 读取，reloadUser() 后自动更新
     final isEmailVerified = authController.isEmailVerified;
 
     return Scaffold(
@@ -64,12 +59,8 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         children: [
-          // ═════════════════════════════════════════════
-          // 用户头像卡片
-          // ═════════════════════════════════════════════
           _buildProfileCard(user, userModel),
 
-          // ✅ NEW: 未验证邮箱提示 banner（已验证则不显示）
           if (!isEmailVerified) ...[
             const SizedBox(height: 12),
             _buildVerificationBanner(authController),
@@ -77,9 +68,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const SizedBox(height: 24),
 
-          // ═════════════════════════════════════════════
-          // 设置分组
-          // ═════════════════════════════════════════════
           _buildSectionLabel('General'),
           const SizedBox(height: 8),
 
@@ -136,9 +124,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ✅ NEW: 邮箱验证提示 Banner
-  // ═══════════════════════════════════════════════════════════════════════════
+  // 郵箱驗證提示 Banner
 
   Widget _buildVerificationBanner(AuthController authController) {
     return Container(
@@ -218,7 +204,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  // ✅ NEW: 发送验证邮件（含 mounted 检查）
   Future<void> _sendVerificationEmail(AuthController authController) async {
     setState(() => _isSendingVerification = true);
 
@@ -250,9 +235,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // UI 组件（与原版相同）
-  // ═══════════════════════════════════════════════════════════════════════════
+  // UI 組件
 
   Widget _buildProfileCard(User? user, dynamic userModel) {
     final displayName =

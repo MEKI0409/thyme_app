@@ -1,6 +1,4 @@
 // screens/habit_tracker_screen.dart
-// Thyme App Habit Tracker Page - Cute Style Version
-// Using shared widget library
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -179,7 +177,7 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
                           final authController =
                           Provider.of<AuthController>(context, listen: false);
                           final user = authController.currentUser;
-                          if (user == null) return; // ✅ FIXED (v3): null 安全检查
+                          if (user == null) return;
                           final habitController =
                           Provider.of<HabitController>(context, listen: false);
                           await habitController.createHabit(
@@ -978,7 +976,7 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
     final moodController = Provider.of<MoodController>(context, listen: false);
     final authController = Provider.of<AuthController>(context, listen: false);
     final user = authController.currentUser;
-    if (user == null) return; // ✅ FIXED (v3): null 安全检查
+    if (user == null) return;
     final userId = user.uid;
 
     final result = await habitController.completeHabit(habit);

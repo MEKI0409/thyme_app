@@ -1,6 +1,4 @@
 // screens/home_screen.dart
-// Thyme App Home Page - Cute Style Version
-// Using shared widget library
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -32,9 +30,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _selectedIndex = 0;
   late AnimationController _floatController;
   late Animation<double> _floatAnimation;
-  bool _isInitialized = false; // ✅ FIXED (v3): 防止 didChangeDependencies 重复初始化
+  bool _isInitialized = false;
 
-  // ✅ FIX: 懒加载子页面，避免一次性实例化所有 screen（含 Gemini、音频等重资源）
   Widget _buildScreen(int index) {
     switch (index) {
       case 0: return const HabitTrackerScreen();
@@ -62,7 +59,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _initAnimations();
   }
 
-  // ✅ FIXED (v3): 从 initState 移到 didChangeDependencies，安全使用 context
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -298,7 +294,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _showLogoutDialog() {
-    // ✅ FIXED (v3): 在 dialog builder 外捕获引用，防止 pop 后 context 失效
     final authController = Provider.of<AuthController>(context, listen: false);
     final navigator = Navigator.of(context);
 

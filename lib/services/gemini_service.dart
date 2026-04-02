@@ -1,5 +1,4 @@
 // services/gemini_service.dart
-// 🌿 Forest Spirit Fern - Gentle AI Companion
 
 import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -86,14 +85,10 @@ Fern: "*settles beside you* Tell me more... what's making your leaves rustle tod
 Remember: You're a friend, not a therapist. Be present, be warm, be Fern.
 ''';
 
-  /// Main chat method - uses ChatSession for conversation history
   Future<String> chat(String userMessage) async {
     return chatWithContext(userMessage);
   }
 
-  /// ✅ NEW: Context-aware chat - Fern knows about your mood, habits, and garden
-  /// This is the key improvement: Fern is no longer a generic chatbot,
-  /// she's a companion who understands your wellness journey.
   Future<String> chatWithContext(
       String userMessage, {
         String? currentMood,
@@ -156,7 +151,6 @@ Remember: You're a friend, not a therapist. Be present, be warm, be Fern.
     }
   }
 
-  /// Build context string from user data (only includes non-null values)
   String _buildContextPrefix({
     String? currentMood,
     int? habitsCompletedToday,
@@ -184,7 +178,6 @@ Remember: You're a friend, not a therapist. Be present, be warm, be Fern.
     return parts.join(', ');
   }
 
-  /// Generate habit completion acknowledgment
   Future<String> generateGentleAcknowledgment(String habitTitle) async {
     if (!_isInitialized || _model == null) {
       return _getLocalAcknowledgment(habitTitle);
@@ -210,7 +203,6 @@ Examples: "Another seed planted~ 🌱" / "*happy rustle* Look at you go! ✨"
     }
   }
 
-  /// Local acknowledgments (offline fallback)
   String _getLocalAcknowledgment(String habitTitle) {
     final responses = [
       "Another seed planted~ 🌱",
@@ -288,7 +280,6 @@ Examples: "Another seed planted~ 🌱" / "*happy rustle* Look at you go! ✨"
     return keywords.any((keyword) => text.contains(keyword));
   }
 
-  /// Reset conversation
   void resetChat() {
     if (_model != null) {
       _chatSession = _model!.startChat();

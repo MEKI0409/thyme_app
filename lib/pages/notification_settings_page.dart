@@ -1,8 +1,4 @@
 // pages/notification_settings_page.dart
-// 通知与提醒设置页面 🔔
-// ✅ FIXED: StatefulWidget 安全处理异步 context
-// ✅ FIXED: mounted 检查防止 context 失效
-// ✅ IMPROVED: 加载状态保护，防止重复操作
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +14,6 @@ class NotificationSettingsPage extends StatefulWidget {
 }
 
 class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
-  // ✅ FIXED: 用于防止时间选择器重复弹出
   bool _isPickingTime = false;
 
   @override
@@ -50,7 +45,6 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           _buildInfoBanner(),
           const SizedBox(height: 24),
 
-          // ── 习惯提醒 ──────────────────────────────────────
           _buildReminderCard(
             controller: controller,
             emoji: '🎯',
@@ -66,7 +60,6 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           ),
           const SizedBox(height: 12),
 
-          // ── 日记提醒 ──────────────────────────────────────
           _buildReminderCard(
             controller: controller,
             emoji: '📝',
@@ -82,7 +75,6 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           ),
           const SizedBox(height: 12),
 
-          // ── 善意提醒 ──────────────────────────────────────
           _buildReminderCard(
             controller: controller,
             emoji: '🌸',
@@ -98,18 +90,16 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           ),
           const SizedBox(height: 24),
 
-          // ── 连续打卡提醒 ───────────────────────────────────
           _buildSimpleToggleCard(
             emoji: '🔥',
             title: 'Streak Alerts',
             description: 'Get notified when your streak is about to break',
             isEnabled: notifications.streakAlertEnabled,
             onToggle: controller.isLoading
-                ? null    // ✅ 加载中禁用
+                ? null
                 : (v) => controller.setStreakAlertEnabled(v),
           ),
 
-          // ── 错误提示 ──────────────────────────────────────
           if (controller.errorMessage != null) ...[
             const SizedBox(height: 16),
             _buildErrorBanner(controller.errorMessage!),
@@ -120,10 +110,6 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       ),
     );
   }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // UI 组件
-  // ═══════════════════════════════════════════════════════════════════════════
 
   Widget _buildInfoBanner() {
     return Container(
@@ -211,7 +197,6 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                   ],
                 ),
               ),
-              // ✅ FIXED: 加载中禁用开关，防止重复触发
               Switch.adaptive(
                 value: isEnabled,
                 onChanged: controller.isLoading ? null : onToggle,
@@ -220,12 +205,10 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
             ],
           ),
 
-          // 时间选择（仅开启时显示）
           if (isEnabled) ...[
             const SizedBox(height: 12),
             const Divider(height: 1, color: Color(0xFFF0F4F0)),
             const SizedBox(height: 12),
-            // ✅ FIXED: 正在选择时显示轻微禁用态，防止重复弹出
             GestureDetector(
               onTap: _isPickingTime ? null : onTimeTap,
               child: AnimatedOpacity(
@@ -358,15 +341,11 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ✅ FIXED: 时间选择 - 安全的异步处理
-  // ═══════════════════════════════════════════════════════════════════════════
 
   Future<void> _pickTime(
       ReminderTime current,
       Function(TimeOfDay) onPicked,
       ) async {
-    // ✅ 防止重复弹出
     if (_isPickingTime) return;
 
     setState(() => _isPickingTime = true);
@@ -390,14 +369,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         },
       );
 
-      // ✅ FIXED: mounted 检查，防止 widget 已销毁时调用 setState / callback
       if (!mounted) return;
 
       if (picked != null) {
         onPicked(picked);
       }
     } finally {
-      // ✅ 无论成功还是取消，都重置状态
       if (mounted) {
         setState(() => _isPickingTime = false);
       }

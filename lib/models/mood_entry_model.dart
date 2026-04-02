@@ -1,6 +1,4 @@
 // models/mood_entry_model.dart
-// ✅ IMPROVED: Safe timestamp parsing, copyWith, confidence score
-// ✅ FIXED (v2): formattedDate 跨午夜逻辑统一为日期比较优先
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -10,10 +8,10 @@ class MoodEntry {
   final String journalText;
   final String detectedMood;
   final double sentimentScore;
-  final double confidence; // ✅ NEW: Confidence of mood detection
+  final double confidence;
   final DateTime createdAt;
-  final List<String>? tags; // ✅ NEW: Optional tags
-  final bool isDeleted; // ✅ NEW: Soft delete support
+  final List<String>? tags;
+  final bool isDeleted;
 
   MoodEntry({
     required this.id,
@@ -27,7 +25,6 @@ class MoodEntry {
     this.isDeleted = false,
   });
 
-  /// ✅ FIXED: Safe parsing of timestamps from Firestore
   factory MoodEntry.fromMap(Map<String, dynamic> map, String id) {
     return MoodEntry(
       id: id,
@@ -42,7 +39,6 @@ class MoodEntry {
     );
   }
 
-  /// ✅ NEW: Safe DateTime parsing
   static DateTime _parseDateTime(dynamic value) {
     if (value == null) return DateTime.now();
 
@@ -61,7 +57,6 @@ class MoodEntry {
     return DateTime.now();
   }
 
-  /// ✅ NEW: Safe double parsing
   static double _parseDouble(dynamic value, {double defaultValue = 0.0}) {
     if (value == null) return defaultValue;
     if (value is double) return value;
@@ -85,7 +80,6 @@ class MoodEntry {
     };
   }
 
-  /// ✅ NEW: copyWith method
   MoodEntry copyWith({
     String? id,
     String? userId,
@@ -110,7 +104,6 @@ class MoodEntry {
     );
   }
 
-  /// ✅ NEW: Get mood emoji
   String get moodEmoji {
     switch (detectedMood.toLowerCase()) {
       case 'happy':
@@ -138,12 +131,10 @@ class MoodEntry {
     }
   }
 
-  /// ✅ NEW: Check if entry is recent (within last hour)
   bool get isRecent {
     return DateTime.now().difference(createdAt).inHours < 1;
   }
 
-  /// ✅ FIXED (v2): 统一使用日历日期比较，消除 inDays / inHours 混用的边界问题
   String get formattedDate {
     final now = DateTime.now();
     final todayDate = DateTime(now.year, now.month, now.day);
@@ -151,7 +142,6 @@ class MoodEntry {
     final calendarDayDiff = todayDate.difference(entryDate).inDays;
 
     if (calendarDayDiff == 0) {
-      // 今天：显示精确时间差
       final difference = now.difference(createdAt);
       if (difference.inMinutes < 1) {
         return 'Just now';
@@ -169,7 +159,6 @@ class MoodEntry {
     }
   }
 
-  /// ✅ NEW: Equality and hashCode
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

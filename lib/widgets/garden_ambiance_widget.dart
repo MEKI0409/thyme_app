@@ -1,11 +1,4 @@
 // widgets/garden_ambiance_widget.dart
-// ✅ IMPROVED: Calm Gamification - Visual ambiance that responds to user's mood
-// ✅ FIXED: Breathing animation now properly loops
-// ✅ FIXED: Positioned widgets now direct children of Stack
-// ✅ FIXED: Stack properly fills parent with StackFit.expand
-// ✅ FIXED: CustomPaint gets proper size via Positioned.fill
-// ✅ FIXED: Raindrop paint side-effect on strokeWidth
-// The garden reflects emotions, it doesn't demand actions
 
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
@@ -182,13 +175,9 @@ class _GardenAmbianceWidgetState extends State<GardenAmbianceWidget>
           stops: const [0.0, 0.4, 0.6, 1.0],
         ),
       ),
-      // ✅ FIX 1: Stack needs StackFit.expand so children get proper size
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // ✅ FIX 2: Warm light - Positioned is now a DIRECT child of Stack
-          // BEFORE: AnimatedBuilder → return Positioned(...)  ← Positioned was NOT direct Stack child!
-          // AFTER:  Positioned → AnimatedBuilder → Container  ← Positioned IS direct Stack child ✓
           if (_ambiance.showWarmLight)
             Positioned(
               top: 50,
@@ -215,9 +204,6 @@ class _GardenAmbianceWidgetState extends State<GardenAmbianceWidget>
               ),
             ),
 
-          // ✅ FIX 3: Particles - Positioned.fill gives CustomPaint proper constraints
-          // BEFORE: AnimatedBuilder → CustomPaint(size: Size.infinite) ← no constraints → 0x0!
-          // AFTER:  Positioned.fill → AnimatedBuilder → CustomPaint ← fills Stack → has real size ✓
           Positioned.fill(
             child: AnimatedBuilder(
               animation: _particleController,
@@ -236,7 +222,6 @@ class _GardenAmbianceWidgetState extends State<GardenAmbianceWidget>
           // Main content
           widget.child,
 
-          // Mood message overlay (subtle, at the top)
           if (widget.showMessage)
             Positioned(
               top: 0,
@@ -297,7 +282,6 @@ class _GardenAmbianceWidgetState extends State<GardenAmbianceWidget>
   }
 }
 
-/// ✅ FIXED: Separate StatefulWidget for breathing animation
 /// This ensures proper animation lifecycle and looping
 class _BreathingGuideWidget extends StatefulWidget {
   const _BreathingGuideWidget({Key? key}) : super(key: key);
@@ -488,7 +472,6 @@ class _BreathingGuideWidgetState extends State<_BreathingGuideWidget>
   }
 }
 
-/// Custom curve for breathing animation (inhale-hold-exhale-rest)
 class _BreathingCurve extends Curve {
   const _BreathingCurve();
 
@@ -544,7 +527,6 @@ class _ParticlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // ✅ FIX 4: Guard against zero-size canvas
     if (size.width <= 0 || size.height <= 0) return;
 
     for (var particle in particles) {
@@ -599,7 +581,6 @@ class _ParticlePainter extends CustomPainter {
           canvas.drawCircle(Offset(x, y), particle.size, paint);
           break;
         case _ParticleType.raindrop:
-        // ✅ FIX 5: Separate paint for stroke, avoid mutating shared paint object
           final strokePaint = Paint()
             ..color = particle.color
             ..strokeWidth = particle.size * 0.5;

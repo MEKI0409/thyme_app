@@ -1,14 +1,4 @@
 // services/garden_audio_service.dart
-// 🎵 花园环境音效服务
-// 根据情绪播放不同的环境音：鸟叫声、雨声、溪流声等
-//
-// ⚠️ 使用前需要:
-// 1. pubspec.yaml 添加依赖: audioplayers: ^6.0.0
-// 2. 添加音频文件到 assets/audio/ 目录
-// 3. pubspec.yaml 注册 assets:
-//    flutter:
-//      assets:
-//        - assets/audio/
 
 import 'package:flutter/foundation.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -21,34 +11,26 @@ class GardenAudioService {
   AudioPlayer? _ambientPlayer;
   String? _currentSound;
   bool _isEnabled = true;
-  double _volume = 0.3; // 默认较低音量，营造背景氛围
+  double _volume = 0.3; // 默認音量
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 🎵 音频资源映射 - ambientSound 名称 → 音频文件路径
-  // ═══════════════════════════════════════════════════════════════════════════
   static const Map<String, String> _soundAssets = {
-    'gentle_stream': 'audio/gentle_stream.mp3',     // 焦虑 → 溪流声
-    'soft_rain': 'audio/soft_rain.mp3',              // 悲伤 → 轻柔雨声
-    'forest_birds': 'audio/forest_birds.mp3',        // 压力 → 森林鸟叫
-    'cheerful_birds': 'audio/cheerful_birds.mp3',    // 开心 → 欢快鸟叫
-    'evening_crickets': 'audio/evening_crickets.mp3', // 平静 → 夜晚蟋蟀
-    'nature_ambient': 'audio/nature_ambient.mp3',    // 默认 → 自然环境音
+    'gentle_stream': 'audio/gentle_stream.mp3',
+    'soft_rain': 'audio/soft_rain.mp3',
+    'forest_birds': 'audio/forest_birds.mp3',
+    'cheerful_birds': 'audio/cheerful_birds.mp3',
+    'evening_crickets': 'audio/evening_crickets.mp3',
+    'nature_ambient': 'audio/nature_ambient.mp3',
   };
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 🔊 公共 API
-  // ═══════════════════════════════════════════════════════════════════════════
 
-  /// 是否启用音效
+
+  /// 檢查是否啟用音量
   bool get isEnabled => _isEnabled;
-
-  /// 当前播放的音效名称
   String? get currentSound => _currentSound;
 
-  /// 当前音量 (0.0 - 1.0)
+  /// 當前音量 (0.0 - 1.0)
   double get volume => _volume;
 
-  /// 启用/禁用音效
   void setEnabled(bool enabled) {
     _isEnabled = enabled;
     if (!enabled) {
@@ -56,21 +38,17 @@ class GardenAudioService {
     }
   }
 
-  /// 设置音量
   void setVolume(double vol) {
     _volume = vol.clamp(0.0, 1.0);
     _ambientPlayer?.setVolume(_volume);
   }
 
-  /// 根据 ambientSound 名称播放对应的环境音
-  /// 这是与 MoodResponsiveGardenService.GardenAmbiance.ambientSound 对接的方法
   Future<void> playAmbientSound(String? soundName) async {
     if (!_isEnabled || soundName == null || soundName.isEmpty) {
       await stop();
       return;
     }
 
-    // 如果已经在播放相同的音效，不重复启动
     if (_currentSound == soundName) return;
 
     final assetPath = _soundAssets[soundName];
@@ -82,12 +60,10 @@ class GardenAudioService {
     }
 
     try {
-      // 停止当前播放
       await stop();
 
-      // 创建新的播放器
       _ambientPlayer = AudioPlayer();
-      _ambientPlayer!.setReleaseMode(ReleaseMode.loop); // 循环播放
+      _ambientPlayer!.setReleaseMode(ReleaseMode.loop);
       _ambientPlayer!.setVolume(_volume);
 
       await _ambientPlayer!.play(AssetSource(assetPath));
@@ -104,8 +80,6 @@ class GardenAudioService {
       _currentSound = null;
     }
   }
-
-  /// 带淡入效果播放（更柔和的过渡）
   Future<void> playWithFadeIn(String? soundName, {
     Duration fadeDuration = const Duration(milliseconds: 1500),
   }) async {
@@ -137,7 +111,6 @@ class GardenAudioService {
     }
   }
 
-  /// 停止播放
   Future<void> stop() async {
     try {
       await _ambientPlayer?.stop();
@@ -151,7 +124,6 @@ class GardenAudioService {
     _currentSound = null;
   }
 
-  /// 带淡出效果停止
   Future<void> stopWithFadeOut({
     Duration fadeDuration = const Duration(milliseconds: 800),
   }) async {
@@ -168,20 +140,17 @@ class GardenAudioService {
     }
 
     await stop();
-    _volume = startVolume; // 恢复原始音量设置
+    _volume = startVolume;
   }
 
-  /// 暂停播放（保留状态，可恢复）
   Future<void> pause() async {
     await _ambientPlayer?.pause();
   }
 
-  /// 恢复播放
   Future<void> resume() async {
     await _ambientPlayer?.resume();
   }
 
-  /// 释放资源（在 dispose 时调用）
   Future<void> dispose() async {
     await stop();
   }

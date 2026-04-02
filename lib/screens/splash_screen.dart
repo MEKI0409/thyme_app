@@ -1,7 +1,4 @@
 // screens/splash_screen.dart
-// Thyme App Splash Screen - Thyme wreath + Clock cute style
-// Slogan: "Take your thyme to bloom"
-// Using CuteTheme unified colors
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,13 +19,11 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  // Animation controllers
   late AnimationController _iconController;
   late AnimationController _textController;
   late AnimationController _fadeController;
   late AnimationController _clockController;
 
-  // Animations
   late Animation<double> _iconScaleAnimation;
   late Animation<double> _iconRotateAnimation;
   late Animation<double> _flowerBloomAnimation;
@@ -49,31 +44,30 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _initAnimations() {
-    // Icon appear animation (0-1s)
+
     _iconController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
 
-    // Clock hand animation (loop)
+
     _clockController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
 
-    // Text fade in animation
+
     _textController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
 
-    // Overall fade out animation
+
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
 
-    // Icon scale - elastic appear
     _iconScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _iconController,
@@ -81,7 +75,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // Icon slight rotation
     _iconRotateAnimation = Tween<double>(begin: -0.1, end: 0.0).animate(
       CurvedAnimation(
         parent: _iconController,
@@ -89,7 +82,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // Flower bloom
     _flowerBloomAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _iconController,
@@ -97,7 +89,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // Clock hand rotation
     _clockHandAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _clockController,
@@ -105,7 +96,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // Title fade in
     _titleFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _textController,
@@ -113,7 +103,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // Title slide up
     _titleSlideAnimation = Tween<double>(begin: 20.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _textController,
@@ -121,7 +110,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // Slogan fade in
     _sloganFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _textController,
@@ -129,7 +117,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // Slogan slide up
     _sloganSlideAnimation = Tween<double>(begin: 15.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _textController,
@@ -137,7 +124,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // Fade out
     _fadeOutAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _fadeController,
@@ -149,23 +135,19 @@ class _SplashScreenState extends State<SplashScreen>
   void _startAnimationSequence() async {
     if (_isDisposed) return;
 
-    // Wait a bit before starting icon animation
     await Future.delayed(const Duration(milliseconds: 200));
     if (_isDisposed || !mounted) return;
     _iconController.forward();
-    _clockController.repeat(); // Clock hands keep rotating
+    _clockController.repeat();
 
-    // Start text animation
     await Future.delayed(const Duration(milliseconds: 600));
     if (_isDisposed || !mounted) return;
     _textController.forward();
 
-    // Fade out after animations complete
     await Future.delayed(const Duration(milliseconds: 2500));
     if (_isDisposed || !mounted) return;
     await _fadeController.forward();
 
-    // Completion callback
     if (_isDisposed || !mounted) return;
     widget.onComplete();
   }
@@ -182,7 +164,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    // ✅ FIX: 用 ListenableBuilder 替代 addListener+setState，避免全量重建
     return ListenableBuilder(
       listenable: Listenable.merge([_fadeController, _iconController, _textController, _clockController]),
       builder: (context, _) {
@@ -201,22 +182,18 @@ class _SplashScreenState extends State<SplashScreen>
                   children: [
                     const Spacer(flex: 2),
 
-                    // Thyme wreath + clock icon
                     _buildThymeIcon(),
 
                     const SizedBox(height: 48),
 
-                    // App name
                     _buildTitle(),
 
                     const SizedBox(height: 16),
 
-                    // Slogan
                     _buildSlogan(),
 
                     const Spacer(flex: 3),
 
-                    // Bottom decoration
                     _buildBottomDecoration(),
 
                     const SizedBox(height: 40),
@@ -330,8 +307,6 @@ class _SplashScreenState extends State<SplashScreen>
   }
 }
 
-/// Thyme icon painter - Wreath + Clock
-/// Using CuteTheme colors
 class _ThymeIconPainter extends CustomPainter {
   final double bloomProgress;
   final double clockProgress;
@@ -346,16 +321,12 @@ class _ThymeIconPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final scale = size.width / 200;
 
-    // Decorative dots (background)
     _drawDecorationDots(canvas, size, scale);
 
-    // Wreath - leaves between flowers
     _drawLeaves(canvas, center, scale);
 
-    // Wreath - thyme flowers
     _drawFlowers(canvas, center, scale);
 
-    // Central clock
     _drawClock(canvas, center, scale);
   }
 
@@ -393,7 +364,6 @@ class _ThymeIconPainter extends CustomPainter {
       canvas.translate(leafCenter.dx, leafCenter.dy);
       canvas.rotate(angle + math.pi / 2);
 
-      // Oval leaf
       final leafRect = Rect.fromCenter(
         center: Offset.zero,
         width: 14 * scale * bloomProgress,
@@ -406,7 +376,6 @@ class _ThymeIconPainter extends CustomPainter {
   }
 
   void _drawFlowers(Canvas canvas, Offset center, double scale) {
-    // Using CuteTheme colors
     final petalColors = [
       CuteTheme.petalPink,
       CuteTheme.petalLight,
@@ -448,7 +417,6 @@ class _ThymeIconPainter extends CustomPainter {
         canvas.restore();
       }
 
-      // Flower center - Using CuteTheme
       final centerPaint = Paint()
         ..color = CuteTheme.flowerCenter
         ..style = PaintingStyle.fill;
@@ -462,20 +430,17 @@ class _ThymeIconPainter extends CustomPainter {
   }
 
   void _drawClock(Canvas canvas, Offset center, double scale) {
-    // Clock background - Using CuteTheme
     final facePaint = Paint()
       ..color = CuteTheme.cream
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, 42 * scale, facePaint);
 
-    // Clock border
     final borderPaint = Paint()
       ..color = CuteTheme.borderLight
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2 * scale;
     canvas.drawCircle(center, 42 * scale, borderPaint);
 
-    // Main marker dots (12, 3, 6, 9 o'clock)
     final mainDotPaint = Paint()
       ..color = CuteTheme.lavender
       ..style = PaintingStyle.fill;
@@ -490,7 +455,6 @@ class _ThymeIconPainter extends CustomPainter {
       canvas.drawCircle(dotCenter, 3.5 * scale, mainDotPaint);
     }
 
-    // Small marker dots
     final smallDotPaint = Paint()
       ..color = CuteTheme.petalPink
       ..style = PaintingStyle.fill;
@@ -506,10 +470,9 @@ class _ThymeIconPainter extends CustomPainter {
       canvas.drawCircle(dotCenter, 2 * scale, smallDotPaint);
     }
 
-    // Hour hand (slow rotation) - Using CuteTheme
     final hourAngle = clockProgress * 2 * math.pi * 0.1 - math.pi / 2;
     final hourHandPaint = Paint()
-      ..color = CuteTheme.primaryGreen // ✅ FIXED: was AppTheme.primaryGreen
+      ..color = CuteTheme.primaryGreen
       ..strokeWidth = 4 * scale
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(

@@ -1,6 +1,4 @@
 // screens/analytics_screen.dart
-// Thyme App Analytics Page - Cute Style Version
-// Using shared widget library
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -55,7 +53,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     final firebaseUser = authController.currentUser;
     final photoUrl = firebaseUser?.photoURL;
 
-    // ✅ FIXED: 读取 emoji 头像
     String avatarDisplay;
     bool isEmoji = false;
     if (photoUrl != null && photoUrl.startsWith('emoji:')) {
@@ -268,7 +265,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     );
   }
 
-  // ✅ Profile 和 Settings 现在直接导航到完整页面，不再用 Dialog 占位
 
   void _showHelpDialog() {
     showDialog(
@@ -315,7 +311,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
   }
 
   void _showLogoutDialog() {
-    // ✅ FIXED (v3): 在 dialog builder 外捕获引用，防止 pop 后 context 失效
     final authController = Provider.of<AuthController>(context, listen: false);
     final navigator = Navigator.of(context);
 

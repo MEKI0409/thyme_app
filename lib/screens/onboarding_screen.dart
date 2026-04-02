@@ -1,12 +1,10 @@
 // screens/onboarding_screen.dart
-// Thyme App Onboarding Page - Cute Style Version 🌸
-// Calm Gamification: Gentle onboarding - no pressure, just introduction
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../utils/theme.dart';
-import 'auth_screen.dart'; // ✅ FIXED: 导入 AuthScreen 以使用 startInRegisterMode 参数
+import 'auth_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
@@ -110,7 +108,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_complete', true);
     if (mounted) {
-      // ✅ FIXED: 新用户完成 onboarding 后，直接进入注册模式（而非登录模式）
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -130,10 +127,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         child: SafeArea(
           child: Column(
             children: [
-              // Skip button
               _buildSkipButton(),
 
-              // Page content
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
@@ -147,10 +142,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 ),
               ),
 
-              // Page indicators
               _buildIndicators(),
 
-              // Navigation buttons
               _buildNavigationButtons(),
 
               const SizedBox(height: 32),
@@ -194,7 +187,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Floating Emoji icon
+
           AnimatedBuilder(
             animation: _floatAnimation,
             builder: (context, child) {
@@ -203,7 +196,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Outer ring decoration
+
                     Container(
                       width: 180,
                       height: 180,
@@ -212,7 +205,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         color: Colors.white.withValues(alpha: 0.3),
                       ),
                     ),
-                    // Middle ring
+
                     Container(
                       width: 140,
                       height: 140,
@@ -228,12 +221,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         ],
                       ),
                     ),
-                    // Emoji
+
                     Text(
                       page.emoji,
                       style: const TextStyle(fontSize: 70),
                     ),
-                    // Small decorative flowers
+
                     ..._buildDecorativeFlowers(page.accentColor),
                   ],
                 ),
@@ -243,7 +236,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
           const SizedBox(height: 50),
 
-          // Title
           Text(
             page.title,
             style: GoogleFonts.poppins(
@@ -257,7 +249,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
           const SizedBox(height: 20),
 
-          // Description
           Text(
             page.description,
             style: GoogleFonts.poppins(
@@ -388,7 +379,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             ),
           ),
 
-          // Next / Begin button
           ElevatedButton(
             onPressed: () {
               if (_currentPage < _pages.length - 1) {

@@ -1,5 +1,4 @@
 // services/sentiment_service.dart
-// Sentiment analysis service using Gemini AI with automatic fallback
 
 import 'dart:async';
 import 'dart:convert';
@@ -16,8 +15,6 @@ class SentimentService {
   static const int _maxRetries = 2;
   static const Duration _timeout = Duration(seconds: 10);
 
-  // ✅ FIXED: gemini-1.5-* models are SHUT DOWN (404 error)
-  // Updated to current available models (sorted by priority)
   static const List<String> _availableModels = [
     'gemini-2.5-flash-lite',
     'gemini-2.0-flash',
@@ -56,7 +53,6 @@ class SentimentService {
     }
   }
 
-  /// Try fallback model
   Future<bool> _tryFallbackModel() async {
     final currentIndex = _availableModels.indexOf(_currentModel);
 
@@ -88,13 +84,11 @@ class SentimentService {
     return false;
   }
 
-  /// Main sentiment analysis method
   Future<Map<String, dynamic>> analyzeSentiment(String text) async {
     if (text.trim().isEmpty) {
       return _getDefaultResult();
     }
 
-    // Try using Gemini AI
     if (_isInitialized && _model != null) {
       try {
         final result = await _analyzeWithGemini(text);
@@ -106,11 +100,9 @@ class SentimentService {
       }
     }
 
-    // Fallback: keyword analysis
     return _analyzeWithKeywords(text);
   }
 
-  /// Analyze sentiment using Gemini AI
   Future<Map<String, dynamic>?> _analyzeWithGemini(String text) async {
     int attempts = 0;
 
@@ -136,7 +128,6 @@ Rules:
 
         final responseText = response.text?.trim() ?? '';
 
-        // Clean response (remove possible markdown markers)
         String cleanJson = responseText;
         if (cleanJson.startsWith('```')) {
           cleanJson = cleanJson.replaceAll(RegExp(r'^```json?\n?'), '');
@@ -144,10 +135,8 @@ Rules:
         }
         cleanJson = cleanJson.trim();
 
-        // Parse JSON
         final parsed = jsonDecode(cleanJson) as Map<String, dynamic>;
 
-        // Validate and normalize result
         final mood = _validateMood(parsed['mood']?.toString());
         final score = _parseDouble(parsed['score'], 0.0).clamp(-1.0, 1.0);
         final confidence = _parseDouble(parsed['confidence'], 0.7).clamp(0.0, 1.0);
@@ -166,14 +155,13 @@ Rules:
       } on GenerativeAIException catch (e) {
         debugPrint('🤖 Gemini API error: ${e.message}');
 
-        // If model not available, try fallback
         if (e.message.contains('not found') ||
             e.message.contains('not supported') ||
             e.message.contains('does not exist')) {
           debugPrint('🔄 Model not available, trying fallback...');
           final success = await _tryFallbackModel();
           if (success) {
-            continue; // Retry with new model
+            continue;
           }
         }
         return null;
@@ -205,7 +193,6 @@ Rules:
     return validMoods.contains(normalized) ? normalized : 'neutral';
   }
 
-  /// Safely parse double
   double _parseDouble(dynamic value, double defaultValue) {
     if (value == null) return defaultValue;
     if (value is double) return value;
@@ -216,7 +203,6 @@ Rules:
     return defaultValue;
   }
 
-  /// Keyword analysis (fallback)
   Map<String, dynamic> _analyzeWithKeywords(String text) {
     final normalizedText = text.toLowerCase();
     final words = _tokenize(normalizedText);
@@ -251,7 +237,6 @@ Rules:
             score = -score * 0.5;
           }
 
-          // Check intensity
           double intensityMultiplier = _getIntensityMultiplier(words, i);
           score *= intensityMultiplier;
 
@@ -261,10 +246,8 @@ Rules:
       }
     }
 
-    // Adjust negated scores
     _adjustNegatedScores(moodScores);
 
-    // Find dominant mood
     String dominantMood = 'neutral';
     double maxScore = 0.0;
 
@@ -275,7 +258,6 @@ Rules:
       }
     });
 
-    // Calculate sentiment score
     double sentimentScore = _calculateSentimentScore(moodScores);
     double confidence = _calculateConfidence(moodScores, totalMatches, words.length);
 
@@ -286,8 +268,6 @@ Rules:
       'source': 'keywords',
     };
   }
-
-  /// Default result
   Map<String, dynamic> _getDefaultResult() {
     return {
       'mood': 'neutral',
@@ -296,10 +276,6 @@ Rules:
       'source': 'default',
     };
   }
-
-  // =============================================================================
-  // Keyword Analysis Helper Methods
-  // =============================================================================
 
   static final List<String> _negationWords = [
     'not', 'no', 'never', 'dont', 'doesnt', 'didnt', 'wont',
@@ -324,8 +300,8 @@ Rules:
     'somewhat': 0.8,
     'slightly': 0.5,
     'super': 1.6,
-    'bit': 0.6,    // ✅ FIXED: was 'a bit' - multi-word can't match after tokenization
-    'little': 0.6, // ✅ FIXED: was 'a little' - same issue
+    'bit': 0.6,
+    'little': 0.6,
   };
 
   static final Map<String, Map<String, double>> _moodKeywords = {
@@ -342,14 +318,14 @@ Rules:
       'disappointed': 0.8, 'heartbroken': 1.3, 'grief': 1.2, 'sorrow': 1.1,
       'melancholy': 0.9, 'blue': 0.6, 'gloomy': 0.8, 'hopeless': 1.2,
       'despair': 1.4, 'loss': 0.7, 'empty': 0.8,
-      'upset': 0.9, 'gutted': 1.0, 'devastated': 1.3, 'mourning': 1.1, // ✅ FIXED: added missing keywords
+      'upset': 0.9, 'gutted': 1.0, 'devastated': 1.3, 'mourning': 1.1,
     },
     'anxious': {
       'anxious': 1.0, 'worried': 0.9, 'nervous': 0.9, 'scared': 1.0,
       'panic': 1.3, 'panicking': 1.3, 'fear': 1.0, 'fearful': 1.0,
       'uneasy': 0.7, 'tense': 0.8, 'restless': 0.7, 'apprehensive': 0.8,
       'dread': 1.1, 'terrified': 1.4, 'paranoid': 1.1, 'overthinking': 0.8,
-      'anxiousness': 0.9, 'freaking': 1.0, 'shaking': 0.8, 'spiraling': 1.0, // ✅ FIXED: added missing keywords
+      'anxiousness': 0.9, 'freaking': 1.0, 'shaking': 0.8, 'spiraling': 1.0,
     },
     'calm': {
       'calm': 1.0, 'peaceful': 1.1, 'relaxed': 1.0, 'serene': 1.2,
@@ -363,24 +339,24 @@ Rules:
       'swamped': 0.9, 'drowning': 1.1, 'struggling': 0.8,
       'deadline': 0.9, 'deadlines': 0.9,
       'frustrated': 1.0, 'frustrating': 0.9, 'frustration': 1.0,
-      'overloaded': 1.0, 'chaotic': 0.8, 'hectic': 0.7, 'stressful': 1.0, // ✅ FIXED: added missing keywords
+      'overloaded': 1.0, 'chaotic': 0.8, 'hectic': 0.7, 'stressful': 1.0,
     },
     'angry': {
       'angry': 1.0, 'mad': 0.9, 'furious': 1.4, 'rage': 1.5,
       'irritated': 0.7, 'annoyed': 0.6, 'pissed': 1.0,
       'livid': 1.3, 'outraged': 1.2, 'resentful': 0.9, 'bitter': 0.8,
       'hate': 1.1, 'hostile': 1.0,
-      'enraged': 1.4, 'fuming': 1.1, 'infuriated': 1.3, // ✅ FIXED: added missing keywords
+      'enraged': 1.4, 'fuming': 1.1, 'infuriated': 1.3,
     },
     'tired': {
       'tired': 1.0, 'exhausted': 1.2, 'sleepy': 0.8, 'drained': 1.0,
       'fatigued': 1.0, 'weary': 0.9, 'worn': 0.8, 'sluggish': 0.7,
-      'burnedout': 1.1, 'lethargic': 0.9, 'drowsy': 0.7, // ✅ FIXED: added missing keywords
+      'burnedout': 1.1, 'lethargic': 0.9, 'drowsy': 0.7,
     },
     'hopeful': {
       'hopeful': 1.0, 'optimistic': 1.1, 'positive': 0.9, 'encouraged': 0.9,
       'motivated': 0.8, 'inspired': 1.0, 'eager': 0.8,
-      'anticipating': 0.9, // ✅ FIXED: was 'looking forward' - multi-word can't match after tokenization
+      'anticipating': 0.9,
     },
     'confused': {
       'confused': 1.0, 'lost': 0.8, 'uncertain': 0.7, 'puzzled': 0.8,
@@ -389,7 +365,7 @@ Rules:
     'lonely': {
       'lonely': 1.0, 'alone': 0.8, 'isolated': 1.0, 'disconnected': 0.9,
       'abandoned': 1.1, 'forgotten': 0.9, 'excluded': 0.8,
-      'invisible': 0.8, 'unwanted': 1.0, 'ignored': 0.8, // ✅ FIXED: added missing keywords
+      'invisible': 0.8, 'unwanted': 1.0, 'ignored': 0.8,
     },
   };
 
@@ -465,28 +441,20 @@ Rules:
         .clamp(0.3, 0.95);
   }
 
-  // =============================================================================
-  // Helper Methods - ✅ FIXED: Delegate to Constants for consistency
-  // =============================================================================
 
-  /// Get mood emoji (delegates to Constants for single source of truth)
   String getMoodEmoji(String mood) {
     return Constants.getMoodEmoji(mood);
   }
 
-  /// Get mood color (delegates to Constants for single source of truth)
   int getMoodColor(String mood) {
     final color = Constants.getMoodColor(mood);
     return color.value;
   }
 
-  /// Check if service is available
   bool get isAvailable => _isInitialized && _model != null;
 
-  /// Get current model
   String get currentModel => _currentModel;
 
-  /// Reinitialize service
   void reinitialize() {
     _isInitialized = false;
     _model = null;

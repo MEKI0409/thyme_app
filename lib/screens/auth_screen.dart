@@ -1,5 +1,4 @@
 // screens/auth_screen.dart
-// Thyme App Login/Register Page - Cute Style Version
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,9 +8,6 @@ import '../controllers/auth_controller.dart';
 import '../utils/theme.dart';
 
 class AuthScreen extends StatefulWidget {
-  /// ✅ FIXED: 支持通过参数控制默认显示登录还是注册
-  /// startInRegisterMode: true = 显示注册页（新用户从 onboarding 来）
-  ///                      false = 显示登录页（默认，老用户）
   final bool startInRegisterMode;
 
   const AuthScreen({Key? key, this.startInRegisterMode = false}) : super(key: key);
@@ -26,7 +22,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
 
-  late bool _isLoginMode = !widget.startInRegisterMode; // ✅ FIXED: 根据参数决定初始模式
+  late bool _isLoginMode = !widget.startInRegisterMode;
   bool _obscurePassword = true;
 
   late AnimationController _floatController;
@@ -357,7 +353,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your email';
                 }
-                // ✅ FIX: 更严格的邮箱格式验证
+
                 final emailRegex = RegExp(r'^[\w\-.+]+@[\w\-]+\.[\w\-]{2,}$');
                 if (!emailRegex.hasMatch(value.trim())) {
                   return 'Please enter a valid email';
@@ -577,6 +573,7 @@ class _CuteBackgroundPainter extends CustomPainter {
 
 class _Decoration {
   final double x;
+
   final double y;
   final double size;
   final Color color;

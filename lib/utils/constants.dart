@@ -1,56 +1,34 @@
 // utils/constants.dart
-// Unified constants for the Thyme app
-
 import 'package:flutter/material.dart';
 
 class Constants {
-  // =============================================================================
-  // API Configuration - Direct Embedding
-  // =============================================================================
-
-  // ⚠️ NEVER hardcode API keys in source code!
   // Pass it at build time:  flutter run --dart-define=GEMINI_API_KEY=your_key
   // Get your free API Key at: https://aistudio.google.com/apikey
   static const String geminiApiKey = String.fromEnvironment('GEMINI_API_KEY');
 
-  // Recommended Gemini models (2025-2026)
-  // ✅ FIXED: gemini-1.5-flash/pro are SHUT DOWN (return 404)
-  // Updated to current available models
   static const String geminiModel = 'gemini-2.5-flash-lite';
   static const String geminiModelFallback = 'gemini-2.0-flash';
 
-  // Sentiment API URL (optional)
   static const String sentimentApiUrl = '';
 
-  // =============================================================================
   // API Status Check
-  // =============================================================================
 
-  /// Check if Gemini API is configured
   static bool get isGeminiConfigured {
     if (geminiApiKey.isEmpty) return false;
     if (geminiApiKey == 'YOUR_GEMINI_API_KEY_HERE') return false;
     if (geminiApiKey == 'YOUR_API_KEY_HERE') return false;
-    // Valid Google API Keys start with AIza
     return geminiApiKey.startsWith('AIza') && geminiApiKey.length > 30;
   }
 
-  /// Check if Sentiment API is configured
   static bool get isSentimentApiConfigured =>
       sentimentApiUrl.isNotEmpty &&
           sentimentApiUrl != 'YOUR_SENTIMENT_API_URL';
 
-  // =============================================================================
-  // App Info
-  // =============================================================================
 
   static const String appName = 'Thyme';
   static const String appVersion = '1.0.0';
   static const String appTagline = 'Take your time to heal';
 
-  // =============================================================================
-  // Mood Configuration
-  // =============================================================================
 
   static const Map<String, Color> moodColors = {
     'happy': Color(0xFFFFD54F),
@@ -80,24 +58,19 @@ class Constants {
     'lonely': '💙',
   };
 
-  /// Safely get mood color
   static Color getMoodColor(String? mood) {
     if (mood == null || mood.isEmpty) return const Color(0xFFB0BEC5);
     return moodColors[mood.toLowerCase()] ?? const Color(0xFFB0BEC5);
   }
 
-  /// Safely get mood emoji
   static String getMoodEmoji(String? mood) {
     if (mood == null || mood.isEmpty) return '😐';
     return moodEmojis[mood.toLowerCase()] ?? '😐';
   }
 
-  /// Get all mood options
+
   static List<String> get allMoods => moodColors.keys.toList();
 
-  // =============================================================================
-  // Habit Categories
-  // =============================================================================
 
   static const Map<String, String> habitCategories = {
     'Mindfulness': '🧘',
@@ -108,23 +81,19 @@ class Constants {
     'Self-Care': '💚',
   };
 
-  /// Safely get category icon
+
   static String getCategoryIcon(String? category) {
     if (category == null || category.isEmpty) return '📌';
     return habitCategories[category] ?? '📌';
   }
 
-  /// Get all categories
+
   static List<String> get allCategories => habitCategories.keys.toList();
 
-  // =============================================================================
-  // Garden System - maxPlantLevel = 10
-  // =============================================================================
 
-  /// Maximum plant level
+
   static const int maxPlantLevel = 10;
 
-  /// Plant stage names (corresponds to GardenModel and icon system)
   static const List<String> plantStageNames = [
     'Seedling',        // Level 0
     'Tiny Sprout',     // Level 1
@@ -139,14 +108,12 @@ class Constants {
     'Mighty Tree',     // Level 10
   ];
 
-  /// Get plant stage name
   static String getPlantStageName(int level) {
     if (level < 0) return plantStageNames.first;
     if (level >= plantStageNames.length) return plantStageNames.last;
     return plantStageNames[level];
   }
 
-  /// Growth messages
   static const List<String> plantGrowthMessages = [
     '🌱 A tiny sprout appears',
     '🌱 Your seedling is taking root',
@@ -161,22 +128,19 @@ class Constants {
     '🌳 A mighty tree of resilience!',
   ];
 
-  /// Safely get growth message
   static String getGrowthMessage(int level) {
     if (level < 0) return plantGrowthMessages.first;
     if (level >= plantGrowthMessages.length) return plantGrowthMessages.last;
     return plantGrowthMessages[level];
   }
 
-  /// Get growth cost - matches GardenModel formula
-  /// GardenModel uses: water = 10 * (level + 1), sunlight = 5 * (level + 1)
   static Map<String, int> getGrowthCost(int currentLevel) {
     final water = 10 * (currentLevel + 1);
     final sunlight = 5 * (currentLevel + 1);
     return {'water': water, 'sunlight': sunlight};
   }
 
-  /// Legacy growthCosts Map (kept for compatibility)
+
   @Deprecated('Use getGrowthCost(level) instead for consistency with GardenModel')
   static const Map<int, Map<String, int>> growthCosts = {
     0: {'water': 10, 'sunlight': 5},
@@ -203,7 +167,6 @@ class Constants {
     {'name': 'Sunset', 'hex': '#FFAB91', 'cost': 40},
   ];
 
-  /// Get garden color by name
   static Map<String, dynamic>? getGardenColorByName(String name) {
     try {
       return gardenColors.firstWhere(
@@ -214,7 +177,6 @@ class Constants {
     }
   }
 
-  /// Get garden color by hex
   static Map<String, dynamic>? getGardenColorByHex(String hex) {
     final normalizedHex = hex.startsWith('#') ? hex : '#$hex';
     try {
@@ -226,9 +188,6 @@ class Constants {
     }
   }
 
-  // =============================================================================
-  // Mood to Habit Recommendations
-  // =============================================================================
 
   static const Map<String, List<String>> moodToCategories = {
     'anxious': ['Mindfulness', 'Self-Care'],
@@ -244,15 +203,11 @@ class Constants {
     'lonely': ['Social', 'Self-Care'],
   };
 
-  /// Get recommended categories for mood
   static List<String> getRecommendedCategories(String? mood) {
     if (mood == null || mood.isEmpty) return ['Self-Care', 'Mindfulness'];
     return moodToCategories[mood.toLowerCase()] ?? ['Self-Care', 'Mindfulness'];
   }
 
-  // =============================================================================
-  // Special Unlocks
-  // =============================================================================
 
   static const Map<String, String> specialUnlocks = {
     'anxious_Mindfulness': '#64B5F6',
@@ -262,26 +217,14 @@ class Constants {
     'calm_Learning': '#81C784',
   };
 
-  /// Check special unlock
   static String? checkSpecialUnlock(String? mood, String? category) {
     if (mood == null || category == null) return null;
     final key = '${mood.toLowerCase()}_$category';
     return specialUnlocks[key];
   }
 
-  // =============================================================================
-  // Reward Calculation
-  // =============================================================================
-
-  /// Base habit completion reward
   static const int baseWaterReward = 2;
   static const int baseSunlightReward = 1;
-
-  /// Category reward bonuses
-  /// - Calming categories (Mindfulness, Self-Care): +water bonus
-  /// - Active categories (Exercise, Learning): +sunlight bonus
-  /// - Social: Neutral baseline (no bonus)
-  /// - Creative: Both bonuses
   static const Map<String, Map<String, int>> categoryBonuses = {
     'Mindfulness': {'water': 1, 'sunlight': 0},
     'Self-Care': {'water': 1, 'sunlight': 0},
@@ -291,7 +234,6 @@ class Constants {
     'Creative': {'water': 1, 'sunlight': 1},
   };
 
-  /// Streak bonus calculation
   static Map<String, int> getStreakBonus(int streak) {
     if (streak >= 30) return {'water': 3, 'sunlight': 3};
     if (streak >= 14) return {'water': 2, 'sunlight': 2};
@@ -299,7 +241,6 @@ class Constants {
     return {'water': 0, 'sunlight': 0};
   }
 
-  /// Calculate habit completion reward (unified method)
   static Map<String, int> calculateHabitReward({
     required String category,
     required int currentStreak,
@@ -308,17 +249,14 @@ class Constants {
     int water = baseWaterReward;
     int sunlight = baseSunlightReward;
 
-    // Category bonus
     final categoryBonus = categoryBonuses[category] ?? {'water': 0, 'sunlight': 0};
     water += categoryBonus['water'] ?? 0;
     sunlight += categoryBonus['sunlight'] ?? 0;
 
-    // Streak bonus
     final streakBonus = getStreakBonus(currentStreak);
     water += streakBonus['water'] ?? 0;
     sunlight += streakBonus['sunlight'] ?? 0;
 
-    // Mood match bonus
     if (currentMood != null) {
       final recommendedCategories = getRecommendedCategories(currentMood);
       if (recommendedCategories.contains(category)) {
@@ -330,9 +268,6 @@ class Constants {
     return {'water': water, 'sunlight': sunlight};
   }
 
-  // =============================================================================
-  // Utility Methods
-  // =============================================================================
 
   /// Safely parse color
   static Color parseColor(String? hex, {Color defaultColor = const Color(0xFF4DB6AC)}) {
@@ -356,10 +291,6 @@ class Constants {
     final hex = color.value.toRadixString(16).padLeft(8, '0').substring(2);
     return includeHash ? '#$hex' : hex;
   }
-
-  // =============================================================================
-  // Time Constants
-  // =============================================================================
 
   static const Duration apiTimeout = Duration(seconds: 15);
   static const Duration animationDuration = Duration(milliseconds: 300);

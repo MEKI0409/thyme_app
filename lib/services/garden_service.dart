@@ -1,5 +1,4 @@
 // services/garden_service.dart
-// ✅ FIXED: Now matches Constants.calculateHabitReward logic completely
 
 import '../models/habit_model.dart';
 import '../models/garden_model.dart';
@@ -7,7 +6,6 @@ import '../utils/constants.dart';
 
 class GardenService {
   /// Calculate rewards for completing a habit
-  /// ✅ FIXED: Now includes all bonuses (category, streak milestones, mood matching)
   Map<String, int> calculateRewards(Habit habit, String? currentMood) {
     // Use the unified Constants method for consistency
     return Constants.calculateHabitReward(
@@ -23,7 +21,6 @@ class GardenService {
   }
 
   /// Grow the plant if resources are sufficient
-  /// ✅ Properly deducts both water and sunlight when growing
   GardenState growPlant(GardenState currentState) {
     // Use the model's tryGrow method for consistency
     return currentState.tryGrow() ?? currentState;

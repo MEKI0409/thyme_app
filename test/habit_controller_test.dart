@@ -1,18 +1,4 @@
 // test/habit_controller_test.dart
-// ============================================================================
-// HABIT MODEL & CONTROLLER - COMPREHENSIVE UNIT TESTS
-// ============================================================================
-// ✅ IMPROVED: 添加更多边界条件测试
-// ✅ IMPROVED: 增强 anti-exploit 机制验证
-// ✅ IMPROVED: 统一使用 Constants
-// ============================================================================
-//
-// DUAL-ARRAY ANTI-EXPLOIT DESIGN:
-//   - completedDates[]: Tracks when habit was marked complete
-//   - rewardedDates[]: Tracks when rewards were claimed
-//   - canClaimReward(): Returns true only if completed today AND not rewarded today
-//
-// ============================================================================
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:thyme_app/models/habit_model.dart';
@@ -87,9 +73,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 2: Completion Status Logic
-    // ========================================================================
+
     group('Completion Status Logic', () {
       test('TC-HC2.1: isCompletedToday() returns false when no completions exist', () {
         final habit = _createTestHabit();
@@ -138,9 +123,8 @@ void main() {
       });
     });
 
-    // ========================================================================
-    // TEST GROUP 3: Reward Status (Anti-Exploit Mechanism)
-    // ========================================================================
+    // TEST GROUP 3: Reward Status
+
     group('Reward Status (Anti-Exploit Mechanism)', () {
       test('TC-HC3.1: isRewardedToday() returns false when no rewards claimed', () {
         final habit = _createTestHabit();
@@ -223,7 +207,6 @@ void main() {
       test('TC-HC3.8: ANTI-EXPLOIT - Reward array correctly prevents exploit', () {
         final today = DateTime.now();
 
-        // Simulate exploit attempt: claim reward multiple times
         var habit = _createTestHabit(
           completedDates: [today],
           rewardedDates: [],
@@ -232,7 +215,6 @@ void main() {
         // First claim - should succeed
         expect(habit.canClaimReward(), isTrue);
 
-        // Simulate claiming (add to rewardedDates)
         habit = habit.copyWith(
           rewardedDates: [...habit.rewardedDates, today],
         );
@@ -243,9 +225,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 4: Streak Calculations
-    // ========================================================================
+
     group('Streak Calculations', () {
       test('TC-HC4.1: New habit should have streak 0', () {
         final habit = _createTestHabit();
@@ -290,9 +271,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 5: Serialization (Map/JSON)
-    // ========================================================================
+
     group('Serialization (Map/JSON)', () {
       test('TC-HC5.1: toMap() should produce complete map', () {
         final now = DateTime.now();
@@ -376,9 +356,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 6: CopyWith Immutability
-    // ========================================================================
+
     group('CopyWith Immutability', () {
       test('TC-HC6.1: copyWith should create new object with updated field', () {
         final original = _createTestHabit(title: 'Original Title');
@@ -432,9 +411,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 7: Date Edge Cases
-    // ========================================================================
+
     group('Date Edge Cases', () {
       test('TC-HC7.1: Completion at midnight should count as today', () {
         final midnight = DateTime(
@@ -486,9 +464,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 8: Statistics Helpers
-    // ========================================================================
+
     group('Statistics Helpers', () {
       test('TC-HC8.1: weeklyCompletionCount should count this week completions', () {
         final now = DateTime.now();
@@ -526,9 +503,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 9: Category Emoji Helper
-    // ========================================================================
+
     group('Category Emoji Helper', () {
       test('TC-HC9.1: Each category should have a corresponding emoji', () {
         final categoryEmojis = {
@@ -559,9 +535,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 10: Reward Calculation Integration
-    // ========================================================================
+
     group('Reward Calculation Integration', () {
       test('TC-HC10.1: Habit category should affect reward calculation', () {
         final mindfulnessHabit = _createTestHabit(category: 'Mindfulness');
@@ -603,9 +578,7 @@ void main() {
   });
 }
 
-// ============================================================================
 // HELPER FUNCTIONS
-// ============================================================================
 
 Habit _createTestHabit({
   String title = 'Test Habit',

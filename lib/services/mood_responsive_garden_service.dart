@@ -1,6 +1,4 @@
 // services/mood_responsive_garden_service.dart
-// Calm Gamification: Garden reflects user's emotional state
-// The garden RESPONDS to emotions, it doesn't DEMAND actions
 
 import 'package:flutter/material.dart';
 
@@ -11,15 +9,13 @@ class MoodResponsiveGardenService {
     switch (currentMood?.toLowerCase()) {
       case 'anxious':
         return GardenAmbiance(
-          // Soothing blue-green tones
           skyGradient: [const Color(0xFFE0F7FA), const Color(0xFFB2EBF2)],
           groundGradient: [const Color(0xFFA5D6A7), const Color(0xFF81C784)],
-          // Slow, gentle wind
           windSpeed: 0.2,
           windIntensity: 0.3,
-          // Calming ambient sound
+
           ambientSound: 'gentle_stream',
-          // Show breathing guide for anxious users
+
           showBreathingGuide: true,
           showFallingPetals: false,
           showButterflies: false,
@@ -34,19 +30,19 @@ class MoodResponsiveGardenService {
 
       case 'sad':
         return GardenAmbiance(
-          // Warm sunset tones - comforting, not cheerful
+
           skyGradient: [const Color(0xFFFFF3E0), const Color(0xFFFFE0B2)],
           groundGradient: [const Color(0xFFBCAAA4), const Color(0xFFA1887F)],
           windSpeed: 0.15,
           windIntensity: 0.2,
-          // Soft rain can be comforting
+
           ambientSound: 'soft_rain',
           showBreathingGuide: false,
           showFallingPetals: false,
           showButterflies: false,
           showSparkles: false,
           showFireflies: false,
-          showWarmLight: true, // Warm glowing light
+          showWarmLight: true,
           showRaindrops: true,
           message:
           "It's okay to feel this way. Your garden holds space for all feelings. 💛",
@@ -56,14 +52,14 @@ class MoodResponsiveGardenService {
 
       case 'stressed':
         return GardenAmbiance(
-          // Natural green tones - grounding
+
           skyGradient: [const Color(0xFFE8F5E9), const Color(0xFFC8E6C9)],
           groundGradient: [const Color(0xFF81C784), const Color(0xFF66BB6A)],
           windSpeed: 0.3,
           windIntensity: 0.4,
           ambientSound: 'forest_birds',
           showBreathingGuide: true,
-          showFallingPetals: true, // Gentle falling petals - relaxing visual
+          showFallingPetals: true,
           showButterflies: false,
           showSparkles: false,
           showFireflies: false,
@@ -77,7 +73,7 @@ class MoodResponsiveGardenService {
 
       case 'happy':
         return GardenAmbiance(
-          // Bright, warm tones
+
           skyGradient: [const Color(0xFFFFFDE7), const Color(0xFFFFF9C4)],
           groundGradient: [const Color(0xFFA5D6A7), const Color(0xFF81C784)],
           windSpeed: 0.4,
@@ -96,7 +92,7 @@ class MoodResponsiveGardenService {
 
       case 'calm':
         return GardenAmbiance(
-          // Soft purple evening tones
+
           skyGradient: [const Color(0xFFF3E5F5), const Color(0xFFE1BEE7)],
           groundGradient: [const Color(0xFFA5D6A7), const Color(0xFF81C784)],
           windSpeed: 0.15,
@@ -106,7 +102,7 @@ class MoodResponsiveGardenService {
           showFallingPetals: false,
           showButterflies: false,
           showSparkles: false,
-          showFireflies: true, // Peaceful fireflies
+          showFireflies: true,
           showWarmLight: true,
           showRaindrops: false,
           message: "A perfect moment of peace. 🌙",
@@ -116,7 +112,7 @@ class MoodResponsiveGardenService {
       case 'neutral':
       default:
         return GardenAmbiance(
-          // Default teal tones
+
           skyGradient: [const Color(0xFFE0F2F1), const Color(0xFFB2DFDB)],
           groundGradient: [const Color(0xFFA5D6A7), const Color(0xFF81C784)],
           windSpeed: 0.25,
@@ -135,7 +131,7 @@ class MoodResponsiveGardenService {
     }
   }
 
-  /// Get ambient particles based on mood
+
   List<AmbientParticle> getAmbientParticles(GardenAmbiance ambiance) {
     final particles = <AmbientParticle>[];
 

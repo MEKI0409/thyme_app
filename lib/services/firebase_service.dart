@@ -1,5 +1,4 @@
 // services/firebase_service.dart
-// ✅ IMPROVED: Offline support, better error handling, additional methods
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,7 +8,6 @@ class FirebaseService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // ✅ NEW: Singleton pattern
   static final FirebaseService _instance = FirebaseService._internal();
   factory FirebaseService() => _instance;
 
@@ -17,7 +15,6 @@ class FirebaseService {
     _configureFirestore();
   }
 
-  /// ✅ NEW: Configure Firestore settings for offline support
   void _configureFirestore() {
     _firestore.settings = const Settings(
       persistenceEnabled: true, // Enable offline persistence
@@ -41,9 +38,7 @@ class FirebaseService {
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // AUTH
-  // ═══════════════════════════════════════════════════════════════════════════
 
   User? get currentUser => _auth.currentUser;
   Stream<User?> get authStateChanges => _auth.authStateChanges();
@@ -69,15 +64,12 @@ class FirebaseService {
     await _auth.signOut();
   }
 
-  /// ✅ NEW: Send password reset email
   Future<void> sendPasswordResetEmail(String email) async {
     _log('Sending password reset email to: $email');
     await _auth.sendPasswordResetEmail(email: email);
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // USERS
-  // ═══════════════════════════════════════════════════════════════════════════
 
   Future<void> createUserDocument(String uid, Map<String, dynamic> data) async {
     _log('Creating user document: $uid');
@@ -88,17 +80,14 @@ class FirebaseService {
     return _firestore.collection('users').doc(uid).snapshots();
   }
 
-  /// ✅ NEW: Update user document
   Future<void> updateUserDocument(String uid, Map<String, dynamic> data) async {
     _log('Updating user document: $uid');
     await _firestore.collection('users').doc(uid).update(data);
   }
 
-  /// ✅ NEW: Delete all user data (for account deletion)
   Future<void> deleteUserData(String uid) async {
     _log('Deleting all user data: $uid');
 
-    // ✅ FIXED (v3): 分批处理，Firestore WriteBatch 上限 500 个操作
     const batchLimit = 450; // 留余量
     var batch = _firestore.batch();
     var operationCount = 0;
@@ -113,10 +102,8 @@ class FirebaseService {
       }
     }
 
-    // Delete user document
     await addDeleteToBatch(_firestore.collection('users').doc(uid));
 
-    // Delete user's habits
     final habits = await _firestore
         .collection('habits')
         .where('userId', isEqualTo: uid)
@@ -125,7 +112,6 @@ class FirebaseService {
       await addDeleteToBatch(doc.reference);
     }
 
-    // Delete user's moods
     final moods = await _firestore
         .collection('moods')
         .where('userId', isEqualTo: uid)
@@ -134,10 +120,8 @@ class FirebaseService {
       await addDeleteToBatch(doc.reference);
     }
 
-    // Delete user's garden
     await addDeleteToBatch(_firestore.collection('gardens').doc(uid));
 
-    // Delete user's kindness acts
     final kindness = await _firestore
         .collection('kindness')
         .where('userId', isEqualTo: uid)
@@ -146,16 +130,13 @@ class FirebaseService {
       await addDeleteToBatch(doc.reference);
     }
 
-    // Commit remaining operations
     if (operationCount > 0) {
       await batch.commit();
     }
     _log('All user data deleted');
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // HABITS
-  // ═══════════════════════════════════════════════════════════════════════════
 
   Future<String> createHabit(Map<String, dynamic> habitData) async {
     _log('Creating habit: ${habitData['title']}');
@@ -193,7 +174,6 @@ class FirebaseService {
     await _firestore.collection('habits').doc(habitId).delete();
   }
 
-  /// ✅ NEW: Batch update multiple habits
   Future<void> batchUpdateHabits(Map<String, Map<String, dynamic>> updates) async {
     _log('Batch updating ${updates.length} habits');
     final batch = _firestore.batch();
@@ -205,9 +185,7 @@ class FirebaseService {
     await batch.commit();
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // MOOD ENTRIES
-  // ═══════════════════════════════════════════════════════════════════════════
 
   Future<String> createMoodEntry(Map<String, dynamic> moodData) async {
     _log('Creating mood entry');
@@ -224,7 +202,6 @@ class FirebaseService {
         .snapshots();
   }
 
-  /// ✅ NEW: Get mood entries for a date range
   Future<List<QueryDocumentSnapshot>> getMoodEntriesForDateRange(
       String userId,
       DateTime start,
@@ -242,21 +219,17 @@ class FirebaseService {
     return snapshot.docs;
   }
 
-  /// ✅ NEW: Delete mood entry
   Future<void> deleteMoodEntry(String entryId) async {
     _log('Deleting mood entry: $entryId');
     await _firestore.collection('moods').doc(entryId).delete();
   }
 
-  /// ✅ NEW: Update mood entry
   Future<void> updateMoodEntry(String entryId, Map<String, dynamic> data) async {
     _log('Updating mood entry: $entryId');
     await _firestore.collection('moods').doc(entryId).update(data);
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // GARDEN
-  // ═══════════════════════════════════════════════════════════════════════════
 
   Future<void> saveGardenState(
       String userId, Map<String, dynamic> gardenData) async {
@@ -268,30 +241,23 @@ class FirebaseService {
     return _firestore.collection('gardens').doc(userId).snapshots();
   }
 
-  /// ✅ NEW: Get garden state once (not stream)
   Future<DocumentSnapshot> getGardenStateOnce(String userId) async {
     return await _firestore.collection('gardens').doc(userId).get();
   }
 
-  /// ✅ NEW: Update garden state partially
   Future<void> updateGardenState(
       String userId, Map<String, dynamic> data) async {
     _log('Updating garden state for user: $userId');
     await _firestore.collection('gardens').doc(userId).update(data);
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // KINDNESS
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  /// ✅ NEW: Create kindness act
   Future<String> createKindnessAct(Map<String, dynamic> data) async {
     _log('Creating kindness act');
     final docRef = await _firestore.collection('kindness').add(data);
     return docRef.id;
   }
 
-  /// ✅ NEW: Get kindness acts for user
   Stream<QuerySnapshot> getKindnessActsForUser(String userId) {
     return _firestore
         .collection('kindness')
@@ -301,7 +267,6 @@ class FirebaseService {
         .snapshots();
   }
 
-  /// ✅ NEW: Get public kindness acts
   Stream<QuerySnapshot> getPublicKindnessActs() {
     return _firestore
         .collection('kindness')
@@ -311,14 +276,10 @@ class FirebaseService {
         .snapshots();
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // UTILITIES
-  // ═══════════════════════════════════════════════════════════════════════════
 
-  /// ✅ NEW: Check network connectivity via Firestore
   Future<bool> isOnline() async {
     try {
-      // Try to fetch a document with a short timeout
       await _firestore
           .collection('_health')
           .doc('check')
@@ -330,12 +291,10 @@ class FirebaseService {
     }
   }
 
-  /// ✅ NEW: Clear local cache (for debugging)
   Future<void> clearCache() async {
     _log('Clearing Firestore cache');
     await _firestore.clearPersistence();
   }
 
-  /// ✅ NEW: Get server timestamp
   FieldValue get serverTimestamp => FieldValue.serverTimestamp();
 }

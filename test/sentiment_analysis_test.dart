@@ -1,17 +1,4 @@
 // test/sentiment_analysis_test.dart
-// ============================================================================
-// SENTIMENT ANALYSIS SERVICE - COMPREHENSIVE UNIT TESTS
-// ============================================================================
-//
-// SENTIMENT OUTPUT STRUCTURE:
-//   {
-//     'mood': String,       // happy, sad, anxious, calm, stressed, etc.
-//     'score': double,      // Range: -1.0 to 1.0
-//     'confidence': double, // Range: 0.0 to 1.0
-//     'source': String      // 'gemini', 'keywords', or 'default'
-//   }
-//
-// ============================================================================
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:thyme_app/services/sentiment_service.dart';
@@ -25,9 +12,8 @@ void main() {
       sentimentService = SentimentService();
     });
 
-    // ========================================================================
     // TEST GROUP 1: Happy Mood Detection
-    // ========================================================================
+
     group('Happy Mood Detection', () {
       test('TC-SA1.1: Should detect happy mood from explicit positive text', () async {
         final result = await sentimentService.analyzeSentiment(
@@ -64,9 +50,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 2: Sad Mood Detection
-    // ========================================================================
+
     group('Sad Mood Detection', () {
       test('TC-SA2.1: Should detect sad mood from negative text', () async {
         final result = await sentimentService.analyzeSentiment(
@@ -103,9 +88,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 3: Anxious Mood Detection
-    // ========================================================================
+
     group('Anxious Mood Detection', () {
       test('TC-SA3.1: Should detect anxious mood from worry text', () async {
         final result = await sentimentService.analyzeSentiment(
@@ -141,9 +125,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 4: Calm Mood Detection
-    // ========================================================================
+
     group('Calm Mood Detection', () {
       test('TC-SA4.1: Should detect calm mood from peaceful text', () async {
         final result = await sentimentService.analyzeSentiment(
@@ -179,9 +162,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 5: Stressed Mood Detection
-    // ========================================================================
+
     group('Stressed Mood Detection', () {
       test('TC-SA5.1: Should detect stressed mood from overwhelm', () async {
         final result = await sentimentService.analyzeSentiment(
@@ -217,9 +199,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 6: Neutral Mood Detection
-    // ========================================================================
+
     group('Neutral Mood Detection', () {
       test('TC-SA6.1: Should detect neutral mood from factual text', () async {
         final result = await sentimentService.analyzeSentiment(
@@ -246,9 +227,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 7: Sentiment Score Range Validation
-    // ========================================================================
+
     group('Sentiment Score Range Validation', () {
       test('TC-SA7.1: Score should always be between -1 and 1', () async {
         final testTexts = [
@@ -310,9 +290,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 8: Edge Cases
-    // ========================================================================
+
     group('Edge Cases', () {
       test('TC-SA8.1: Empty string should return neutral', () async {
         final result = await sentimentService.analyzeSentiment('');
@@ -370,9 +349,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 9: Source Attribution
-    // ========================================================================
+
     group('Source Attribution', () {
       test('TC-SA9.1: Result should include source information', () async {
         final result = await sentimentService.analyzeSentiment(
@@ -393,9 +371,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 10: Emoji and Color Helpers
-    // ========================================================================
+
     group('Emoji and Color Helpers', () {
       test('TC-SA10.1: Each mood should have a corresponding emoji', () {
         final moodEmojis = {
@@ -447,9 +424,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 11: Integration - Valid Mood Values for Garden
-    // ========================================================================
+
     group('Integration - Valid Mood Values for Garden', () {
       test('TC-SA11.1: Detected mood should be a valid garden mood', () async {
         final testCases = {

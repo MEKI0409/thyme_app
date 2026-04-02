@@ -1,17 +1,13 @@
 // utils/theme.dart
-// Cute Style Theme - Supporting both AppTheme and CuteTheme class names
-// Color inspiration: Thyme wreath - Soft green + Pink-purple petal colors 🌸
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 🌿 Primary Colors - Soft Green Series
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Primary Colors - Soft Green Series
   static const Color primaryColor = Color(0xFF7AC996);
-  static const Color primaryGreen = Color(0xFF7AC996);     // CuteTheme alias
+  static const Color primaryGreen = Color(0xFF7AC996);
   static const Color primaryLight = Color(0xFFB0DDB8);
   static const Color primaryDark = Color(0xFF5BA97A);
   static const Color softGreen = Color(0xFFB0DDB8);
@@ -23,9 +19,7 @@ class AppTheme {
   static const Color secondaryColor = Color(0xFFE8D0F0);
   static const Color accentColor = Color(0xFFFFE082);
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 🌸 Petal Colors
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Petal Colors
   static const Color petalPink = Color(0xFFE8D0F0);
   static const Color petalLight = Color(0xFFF0D8F4);
   static const Color petalMid = Color(0xFFE0C8EC);
@@ -33,9 +27,7 @@ class AppTheme {
   static const Color lavender = Color(0xFFD4B8E0);
   static const Color coralPink = Color(0xFFFFAB91);
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 🏠 Background Colors
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Background Colors
   static const Color backgroundColor = Color(0xFFFAF8F5);
   static const Color warmWhite = Color(0xFFFAF8F5);
   static const Color surfaceColor = Color(0xFFFFFEFC);
@@ -44,37 +36,33 @@ class AppTheme {
   static const Color cream = Color(0xFFFFFBF5);
   static const Color borderLight = Color(0xFFEDE5DA);
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 📝 Text Colors
-  // ═══════════════════════════════════════════════════════════════════════════
+  //  Text Colors
   static const Color textPrimary = Color(0xFF3D6B4F);
   static const Color textDark = Color(0xFF3D6B4F);
   static const Color textSecondary = Color(0xFF5A8A6A);
   static const Color textMuted = Color(0xFF8A9A8E);
   static const Color textHint = Color(0xFF8A9A8E);
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 🎯 Status Colors
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Status Colors
+
   static const Color successColor = Color(0xFF81C784);
   static const Color warningColor = Color(0xFFFFCC80);
   static const Color warmOrange = Color(0xFFFFCC80);
   static const Color errorColor = Color(0xFFE57373);
-  static const Color errorRed = Color(0xFFE57373);         // alias
+  static const Color errorRed = Color(0xFFE57373);
   static const Color infoColor = Color(0xFF90CAF9);
   static const Color skyBlue = Color(0xFF90CAF9);
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 🌸 Garden Resource Colors
-  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Garden Resource Colors
+
   static const Color waterColor = Color(0xFF81D4FA);
   static const Color waterBlue = Color(0xFF81D4FA);
   static const Color sunlightColor = Color(0xFFFFCC80);
   static const Color sunnyYellow = Color(0xFFFFE082);
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // 📐 Spacing
-  // ═══════════════════════════════════════════════════════════════════════════
+
   static const double spacingXS = 4.0;
   static const double spacingS = 8.0;
   static const double spacingM = 16.0;
@@ -82,9 +70,9 @@ class AppTheme {
   static const double spacingXL = 32.0;
   static const double spacingXXL = 48.0;
 
-  // ═══════════════════════════════════════════════════════════════════════════
+
   // 🔵 Border Radius - More rounded and cute
-  // ═══════════════════════════════════════════════════════════════════════════
+
   static const double radiusS = 12.0;
   static const double radiusSmall = 12.0;
   static const double radiusM = 16.0;
@@ -95,9 +83,7 @@ class AppTheme {
   static const double radiusXLarge = 32.0;
   static const double radiusRound = 100.0;
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // 🎨 Gradients
-  // ═══════════════════════════════════════════════════════════════════════════
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -118,9 +104,7 @@ class AppTheme {
     ],
   );
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // 💫 Shadows
-  // ═══════════════════════════════════════════════════════════════════════════
   static List<BoxShadow> get cardShadow => [
     BoxShadow(
       color: primaryColor.withValues(alpha: 0.08),
@@ -153,9 +137,7 @@ class AppTheme {
     ),
   ];
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 🔘 Button Styles
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Button Styles
   static ButtonStyle primaryButtonStyle = ElevatedButton.styleFrom(
     backgroundColor: primaryGreen,
     foregroundColor: Colors.white,
@@ -197,9 +179,8 @@ class AppTheme {
     ),
   );
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 📱 ThemeData
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ThemeData
+
   static ThemeData get themeData => lightTheme;
 
   static ThemeData lightTheme = ThemeData(
@@ -449,9 +430,7 @@ class AppTheme {
     ),
   );
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 🎨 Helper Methods
-  // ═══════════════════════════════════════════════════════════════════════════
+
 
   static LinearGradient getMoodGradient(String? mood) {
     switch (mood?.toLowerCase()) {
@@ -552,14 +531,7 @@ class AppTheme {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ✅ CuteTheme Alias - Makes all code using CuteTheme work
-// ═══════════════════════════════════════════════════════════════════════════
 typedef CuteTheme = AppTheme;
-
-// ═══════════════════════════════════════════════════════════════════════════
-// 🌸 Cute Decoration Widgets
-// ═══════════════════════════════════════════════════════════════════════════
 
 /// Small flower decoration
 class CuteFlowerDecoration extends StatelessWidget {
@@ -619,6 +591,3 @@ class CuteDotDecoration extends StatelessWidget {
     );
   }
 }
-
-// ✅ CuteCard 和 CuteButton 已移至 cute_widgets.dart，避免重复定义
-// 请使用: import '../widgets/cute_widgets.dart';

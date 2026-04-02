@@ -1,7 +1,4 @@
 // controllers/habit_controller.dart
-// ✅ IMPROVED: Fixed streak calculation edge cases, better error handling
-// ✅ FIXED: getHabitById 使用 indexWhere 替代 try-catch，效率更高
-// ✅ FIXED (v2): completeHabit 加锁防止双击竞态
 
 import 'package:flutter/foundation.dart';
 import 'dart:async';
@@ -17,14 +14,12 @@ class HabitController extends ChangeNotifier {
   StreamSubscription? _habitsSubscription;
   String? _currentUserId;
 
-  // ✅ FIXED (v2): 防止同一 habit 同时被完成多次
   final Set<String> _completingHabitIds = {};
 
-  List<Habit> get habits => List.unmodifiable(_habits); // ✅ FIXED: 防止外部直接修改内部列表
+  List<Habit> get habits => List.unmodifiable(_habits);
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  // ✅ Filter getters
   List<Habit> get activeHabits =>
       _habits.where((h) => !h.isArchived).toList();
 
@@ -37,7 +32,6 @@ class HabitController extends ChangeNotifier {
   List<Habit> get archivedHabits =>
       _habits.where((h) => h.isArchived).toList();
 
-  // ✅ Statistics
   int get totalHabits => activeHabits.length;
   int get completedToday => completedTodayHabits.length;
   double get completionRate =>
@@ -50,7 +44,6 @@ class HabitController extends ChangeNotifier {
       ? 0
       : activeHabits.map((h) => h.currentStreak).reduce((a, b) => a > b ? a : b);
 
-  // ✅ Debug logging
   void _log(String message) {
     if (kDebugMode) {
       debugPrint('🎯 HabitController: $message');
@@ -73,7 +66,6 @@ class HabitController extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    // Cancel previous subscription
     _habitsSubscription?.cancel();
 
     _habitsSubscription = _firebaseService.getHabitsForUser(userId).listen(
@@ -86,7 +78,6 @@ class HabitController extends ChangeNotifier {
             return Habit.fromMap(data, doc.id);
           }).toList();
 
-          // Sort by creation date (newest first) or by category
           _habits.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
           _log('Successfully loaded ${_habits.length} habits');
@@ -154,17 +145,14 @@ class HabitController extends ChangeNotifier {
     }
   }
 
-  /// ✅ Complete habit and return reward info
-  /// ✅ FIXED (v2): 加锁防止双击 / 高频并发导致重复完成
   Future<Map<String, dynamic>> completeHabit(Habit habit) async {
-    // ✅ FIXED (v2): 如果已经在处理中，直接返回
     if (_completingHabitIds.contains(habit.id)) {
       _log('Habit ${habit.title} is already being completed, skipping');
       return {'success': false, 'shouldReward': false, 'reason': 'in_progress'};
     }
 
     try {
-      _completingHabitIds.add(habit.id); // ✅ 加锁
+      _completingHabitIds.add(habit.id);
 
       if (habit.isCompletedToday()) {
         _log('Habit already completed today: ${habit.title}');
@@ -174,16 +162,13 @@ class HabitController extends ChangeNotifier {
       final now = DateTime.now();
       final updatedDates = [...habit.completedDates, now];
 
-      // ✅ FIXED: Calculate streak properly
       final newStreak = _calculateStreak(updatedDates);
       final newLongest = newStreak > habit.longestStreak
           ? newStreak
           : habit.longestStreak;
 
-      // ✅ Check if should reward (not rewarded today)
       final shouldReward = !habit.isRewardedToday();
 
-      // Update rewarded dates if should reward
       List<String> updatedRewardedDates = habit.rewardedDates
           .map((date) => date.toIso8601String())
           .toList();
@@ -215,11 +200,10 @@ class HabitController extends ChangeNotifier {
       notifyListeners();
       return {'success': false, 'shouldReward': false, 'error': e.toString()};
     } finally {
-      _completingHabitIds.remove(habit.id); // ✅ 解锁
+      _completingHabitIds.remove(habit.id);
     }
   }
 
-  /// ✅ Uncomplete habit (rewards are NOT returned - anti-exploit)
   Future<bool> uncompleteHabit(Habit habit) async {
     try {
       if (!habit.isCompletedToday()) {
@@ -227,7 +211,6 @@ class HabitController extends ChangeNotifier {
         return false;
       }
 
-      // Remove today's completion
       final today = DateTime.now();
       final updatedDates = habit.completedDates.where((date) {
         return !(date.year == today.year &&
@@ -239,7 +222,6 @@ class HabitController extends ChangeNotifier {
 
       _log('Uncompleting habit: ${habit.title}');
 
-      // ⚠️ NOTE: rewardedDates is NOT modified - rewards are not returned
       await _firebaseService.updateHabit(habit.id, {
         'completedDates': updatedDates
             .map((date) => date.toIso8601String())
@@ -256,7 +238,6 @@ class HabitController extends ChangeNotifier {
     }
   }
 
-  /// ✅ Archive habit instead of delete (soft delete)
   Future<bool> archiveHabit(String habitId) async {
     try {
       _log('Archiving habit: $habitId');
@@ -272,7 +253,6 @@ class HabitController extends ChangeNotifier {
     }
   }
 
-  /// ✅ Restore archived habit
   Future<bool> restoreHabit(String habitId) async {
     try {
       _log('Restoring habit: $habitId');
@@ -288,7 +268,6 @@ class HabitController extends ChangeNotifier {
     }
   }
 
-  /// Permanently delete habit
   Future<bool> deleteHabit(String habitId) async {
     try {
       _log('Deleting habit: $habitId');
@@ -303,7 +282,6 @@ class HabitController extends ChangeNotifier {
     }
   }
 
-  /// ✅ Update habit details
   Future<bool> updateHabit(
       String habitId, {
         String? title,
@@ -331,11 +309,9 @@ class HabitController extends ChangeNotifier {
     }
   }
 
-  /// ✅ FIXED: Calculate streak with proper edge case handling
   int _calculateStreak(List<DateTime> completedDates) {
     if (completedDates.isEmpty) return 0;
 
-    // ✅ FIXED: 先去重归一化再排序（移除不必要的第一次排序）
     final normalizedDates = completedDates
         .map((d) => DateTime(d.year, d.month, d.day))
         .toSet()
@@ -350,16 +326,13 @@ class HabitController extends ChangeNotifier {
       DateTime.now().day,
     );
 
-    // ✅ FIX: Check if most recent completion is today or yesterday
     final lastCompletion = normalizedDates.first;
     final daysSinceLastCompletion = today.difference(lastCompletion).inDays;
 
-    // If last completion was more than 1 day ago, streak is broken
     if (daysSinceLastCompletion > 1) {
       return 0;
     }
 
-    // Count consecutive days
     int streak = 1;
     for (int i = 0; i < normalizedDates.length - 1; i++) {
       final current = normalizedDates[i];
@@ -369,7 +342,6 @@ class HabitController extends ChangeNotifier {
       if (diff == 1) {
         streak++;
       } else {
-        // Gap found, stop counting
         break;
       }
     }
@@ -377,18 +349,15 @@ class HabitController extends ChangeNotifier {
     return streak;
   }
 
-  /// ✅ FIXED: Get habit by ID - 使用 indexWhere 替代 try-catch，效率更高
   Habit? getHabitById(String habitId) {
     final index = _habits.indexWhere((h) => h.id == habitId);
     return index != -1 ? _habits[index] : null;
   }
 
-  /// ✅ Get habits by category
   List<Habit> getHabitsByCategory(String category) {
     return activeHabits.where((h) => h.category == category).toList();
   }
 
-  /// ✅ Refresh habits
   Future<void> refresh() async {
     if (_currentUserId != null) {
       loadHabits(_currentUserId!);
@@ -400,14 +369,13 @@ class HabitController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// ✅ Reset controller state
   void reset() {
     _habitsSubscription?.cancel();
     _habits = [];
     _isLoading = false;
     _errorMessage = null;
     _currentUserId = null;
-    _completingHabitIds.clear(); // ✅ FIXED (v2): 清理锁
+    _completingHabitIds.clear();
     notifyListeners();
   }
 

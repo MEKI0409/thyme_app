@@ -1,6 +1,4 @@
 // screens/kindness_chain_screen.dart
-// Kindness Chain Screen - Cute Soft Version
-// Using shared widget library
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/kindness_controller.dart';
 import '../controllers/garden_controller.dart';
-import '../controllers/mood_controller.dart'; // ✅ NEW: For mood-aware prompts
+import '../controllers/mood_controller.dart';
 import '../models/kindness_chain_model.dart';
 import '../utils/theme.dart';
 import '../widgets/cute_garden_icons.dart';
@@ -38,7 +36,6 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
     super.dispose();
   }
 
-  /// ✅ NEW: Get current mood from MoodController (safe, returns null if unavailable)
   String? _getCurrentMood() {
     try {
       return Provider.of<MoodController>(context, listen: false).currentMood;
@@ -47,7 +44,6 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
     }
   }
 
-  /// ✅ NEW: Check and show streak milestone celebration
   void _checkStreakMilestone(KindnessController controller) {
     final milestone = controller.consumeMilestone();
     if (milestone == null) return;
@@ -145,7 +141,6 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
     );
   }
 
-  // ✅ FIXED: Added _dismissed flag to prevent double-pop race condition
   void _showKindnessAddedFeedback(Map<String, dynamic>? rewardInfo) {
     final sunlight = rewardInfo?['sunlight'] ?? 2;
     final water = rewardInfo?['water'] ?? 1;
@@ -162,14 +157,14 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
 
     showGeneralDialog(
       context: context,
-      barrierDismissible: false, // ✅ FIXED: was true, now managed by safeDismiss
+      barrierDismissible: false,
       barrierLabel: 'Dismiss',
       barrierColor: Colors.black.withValues(alpha: 0.3),
       transitionDuration: const Duration(milliseconds: 400),
       pageBuilder: (context, anim1, anim2) {
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: safeDismiss, // ✅ Tap anywhere to dismiss safely
+          onTap: safeDismiss,
           child: Center(
             child: Material(
               color: Colors.transparent,
@@ -255,7 +250,6 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
                             ),
                           ),
                           const SizedBox(height: 24),
-                          // ✅ FIXED: Use FittedBox to prevent right overflow on small screens
                           FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Container(
@@ -298,7 +292,7 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
     );
 
     Future.delayed(const Duration(seconds: 3), () {
-      safeDismiss(); // ✅ FIXED: uses safeDismiss instead of raw Navigator.pop
+      safeDismiss();
     });
   }
 
@@ -443,7 +437,6 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          // ✅ NEW: Mood-aware prompt instead of static one
                           Provider.of<KindnessController>(context, listen: false)
                               .getMoodAwarePrompt(
                             _getCurrentMood(),
@@ -499,7 +492,7 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
                     ),
                   ),
                 ),
-                // ✅ NEW: Quick-add suggestion chips
+
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
@@ -694,10 +687,6 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
                                 return;
                               }
 
-                              // ✅ FIXED: Capture all references BEFORE popping the bottom sheet.
-                              // After Navigator.pop(context), this bottom sheet's `context` is
-                              // disposed, so `context.mounted` will always be false — which was
-                              // the root cause of rewards/feedback never executing.
                               final authController =
                               Provider.of<AuthController>(context, listen: false);
                               final gardenController =
@@ -721,10 +710,8 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
                                 return;
                               }
 
-                              // ✅ FIXED (v3): 安全获取 uid，避免 ! 强制解包
                               final userId = authController.currentUser!.uid;
 
-                              // Pop bottom sheet first for snappy feel
                               Navigator.pop(context);
 
                               try {
@@ -735,10 +722,7 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
                                   isPublic: publicFlag,
                                 );
 
-                                // ✅ FIXED: Use widget's `mounted` (State.mounted),
-                                // NOT the bottom sheet's `context.mounted`
                                 if (success && mounted) {
-                                  // ✅ FIXED (v3): 仅在 onRewardEarned 未注入时手动发放，防止双倍奖励
                                   if (kindnessController.onRewardEarned == null) {
                                     final rewards = kindnessController.getLastRewardValues();
                                     await gardenController.addKindnessReward(
@@ -750,7 +734,6 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
                                   if (mounted) {
                                     _showKindnessAddedFeedback(kindnessController.lastRewardInfo);
 
-                                    // ✅ NEW: Check for streak milestone after a short delay
                                     Future.delayed(const Duration(seconds: 4), () {
                                       if (mounted) {
                                         _checkStreakMilestone(kindnessController);
@@ -894,8 +877,6 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
                 ],
               ),
             ),
-            // ✅ FIXED: Use Stack so the floating button overlays the content
-            // instead of competing for Column space (which caused the 54px overflow)
             Expanded(
               child: Stack(
                 children: [
@@ -1032,7 +1013,6 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
     );
   }
 
-  /// ✅ NEW: Visual category distribution bar
   Widget _buildCategoryDistribution(KindnessController controller) {
     final dist = controller.getCategoryDistribution();
     if (dist.isEmpty) return const SizedBox.shrink();
@@ -1066,7 +1046,6 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
             ),
           ),
           const SizedBox(height: 10),
-          // Distribution bar
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: SizedBox(
@@ -1181,13 +1160,9 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
   }
 
   Widget _buildEmptyState() {
-    // ✅ FIXED: Removed actionText/onAction — the floating "Plant Kindness"
-    // button at the bottom already serves this purpose. Having both caused
-    // the 54px overflow and visual overlap on tab switch.
-    // Wrapped in SingleChildScrollView to prevent overflow on small screens.
     return const SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.only(bottom: 80), // space for floating button
+        padding: EdgeInsets.only(bottom: 80),
         child: CuteEmptyState(
           emoji: '🌱',
           title: 'Your kindness garden awaits~',
@@ -1285,8 +1260,6 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
                 children: [
                   Row(
                     children: [
-                      // ✅ FIXED: Use fixed-size SizedBox to prevent ZWJ emoji
-                      // (like 👨‍👩‍👧) from expanding the container and causing right overflow
                       SizedBox(
                         width: 44,
                         height: 44,
@@ -1387,7 +1360,6 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
                         const Spacer(),
                         GestureDetector(
                           onTap: () async {
-                            // ✅ FIX: Pass current user ID to prevent self-rippling
                             final currentUserId = Provider.of<AuthController>(
                               context, listen: false,
                             ).currentUser?.uid;

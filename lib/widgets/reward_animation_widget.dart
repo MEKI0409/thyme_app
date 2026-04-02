@@ -1,6 +1,4 @@
 // widgets/reward_animation_widget.dart
-// ✅ IMPROVED: Calm Gamification - Gentle, satisfying reward animations
-// Celebrates without overwhelming - soft particles, not explosions
 
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
@@ -36,7 +34,7 @@ class RewardCelebration extends StatefulWidget {
       }) {
     showGeneralDialog(
       context: context,
-      barrierDismissible: false, // ✅ 改为 false，防止与 onTap/autoClose 竞争
+      barrierDismissible: false,
       barrierLabel: 'Reward',
       barrierColor: Colors.black26,
       transitionDuration: const Duration(milliseconds: 300),
@@ -82,7 +80,7 @@ class _RewardCelebrationState extends State<RewardCelebration>
 
   final List<_RewardParticle> _particles = [];
   final math.Random _random = math.Random();
-  bool _dismissed = false; // ✅ 防止多次关闭
+  bool _dismissed = false; //防止多次關閉
 
   @override
   void initState() {
@@ -94,7 +92,6 @@ class _RewardCelebrationState extends State<RewardCelebration>
     Future.delayed(widget.displayDuration, _safeDismiss);
   }
 
-  // ✅ 安全关闭方法，确保只调用一次
   void _safeDismiss() {
     if (!mounted || _dismissed) return;
     _dismissed = true;
@@ -226,7 +223,7 @@ class _RewardCelebrationState extends State<RewardCelebration>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _safeDismiss, // ✅ 使用安全关闭方法
+      onTap: _safeDismiss,
       behavior: HitTestBehavior.opaque,
       child: Material(
         color: Colors.transparent,
@@ -283,7 +280,6 @@ class _RewardCelebrationState extends State<RewardCelebration>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Gentle message - ✅ Calm Gamification compliant
           Text(
             widget.message ?? 'A moment of care for yourself',
             style: TextStyle(
@@ -526,7 +522,6 @@ class _RewardParticlePainter extends CustomPainter {
     canvas.translate(center.dx, center.dy);
     canvas.rotate(rotation);
 
-    // ✅ FIXED: Use separate Paint for stroke lines to avoid side-effects
     final rayPaint = Paint()
       ..color = paint.color
       ..strokeWidth = size * 0.2
@@ -748,7 +743,7 @@ class _ResourceRippleState extends State<ResourceRipple>
   }
 }
 
-/// ✅ NEW: Gentle acknowledgment toast (non-intrusive)
+/// ✅ NEW: Gentle acknowledgment toast
 class GentleToast {
   static void show(
       BuildContext context, {

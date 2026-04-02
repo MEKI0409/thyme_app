@@ -1,10 +1,7 @@
 // models/kindness_chain_model.dart
-// 善意链数据模型 🌸
-// ✅ FIXED: 添加安全的 Timestamp 解析，与其他 model 保持一致
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// 善意行为模型
 class KindnessAct {
   final String id;
   final String userId;
@@ -36,7 +33,6 @@ class KindnessAct {
     );
   }
 
-  /// ✅ FIXED: 安全的 DateTime 解析，处理 Timestamp / String / DateTime
   static DateTime _parseDateTime(dynamic value) {
     if (value == null) return DateTime.now();
     if (value is Timestamp) return value.toDate();
@@ -82,7 +78,6 @@ class KindnessAct {
     );
   }
 
-  /// ✅ NEW: Equality and hashCode
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -98,9 +93,7 @@ class KindnessAct {
   }
 }
 
-/// 善意类别定义
 class KindnessCategory {
-  /// 所有善意类别及其显示文字
   static const Map<String, String> categories = {
     'self': '💚 Self',
     'family': '👨‍👩‍👧 Family',
@@ -111,7 +104,6 @@ class KindnessCategory {
     'other': '✨ Other',
   };
 
-  /// 获取类别的 emoji
   static String getEmoji(String category) {
     switch (category) {
       case 'self':
@@ -132,7 +124,6 @@ class KindnessCategory {
     }
   }
 
-  /// 获取类别的显示标签
   static String getLabel(String category) {
     switch (category) {
       case 'self':
@@ -153,7 +144,6 @@ class KindnessCategory {
     }
   }
 
-  /// 获取类别的温柔描述
   static String getDescription(String category) {
     switch (category) {
       case 'self':
@@ -174,21 +164,20 @@ class KindnessCategory {
     }
   }
 
-  /// 获取类别对应的花园奖励类型
   static String getRewardType(String category) {
     switch (category) {
       case 'self':
-        return 'water'; // 自我关怀 → 水滴（滋养）
+        return 'water';
       case 'nature':
-        return 'water'; // 自然 → 水滴
+        return 'water';
       case 'stranger':
-        return 'sunlight'; // 陌生人 → 阳光（温暖传播最远）
+        return 'sunlight';
       case 'family':
-        return 'sunlight'; // 家庭 → 阳光（温暖）
+        return 'sunlight';
       case 'community':
-        return 'sunlight'; // 社区 → 阳光
+        return 'sunlight';
       default:
-        return 'both'; // 其他 → 平衡
+        return 'both';
     }
   }
 }

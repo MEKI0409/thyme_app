@@ -1,16 +1,13 @@
 // services/gentle_insights_service.dart
-// Calm Gamification: Provides warm, non-judgmental insights about user patterns
 
 import '../models/habit_model.dart';
 import '../models/mood_entry_model.dart';
 
 class GentleInsightsService {
-  /// Generate gentle, non-judgmental insights
-  /// Never uses phrases like "you should", "you need to", or comparative language
   String generateInsight(List<Habit> habits, List<MoodEntry> moods) {
     final insights = <String>[];
 
-    // Find user's natural preferences (observation, not judgment)
+
     final favoriteCategory = _findNaturalPreference(habits);
     if (favoriteCategory != null) {
       insights.add(
@@ -19,30 +16,26 @@ class GentleInsightsService {
       );
     }
 
-    // Observe mood patterns without judgment
     final moodPattern = _observeMoodPattern(moods);
     if (moodPattern != null) {
       insights.add(moodPattern);
     }
 
-    // Notice small wins (not achievements)
     final gentleProgress = _noticeSmallWins(habits);
     if (gentleProgress != null) {
       insights.add(gentleProgress);
     }
 
-    // Reflect on journaling patterns
+
     final journalReflection = _reflectOnJournaling(moods);
     if (journalReflection != null) {
       insights.add(journalReflection);
     }
 
-    // If no data, still provide warmth
     if (insights.isEmpty) {
       return _getWarmEmptyStateMessage();
     }
 
-    // Return a different insight based on the day (variety without pressure)
     return insights[DateTime.now().day % insights.length];
   }
 
@@ -108,7 +101,6 @@ class GentleInsightsService {
       }
     }
 
-    // If they haven't done anything today, that's okay too
     if (habits.isNotEmpty) {
       return "Your garden is here whenever you're ready. "
           "There's no rush, no schedule. 🌿";
@@ -117,13 +109,10 @@ class GentleInsightsService {
     return null;
   }
 
-  /// Reflect on journaling without pressure
-  /// NOTE: Uses createdAt instead of timestamp - adjust if your model uses different property
   String? _reflectOnJournaling(List<MoodEntry> moods) {
     if (moods.isEmpty) return null;
 
     final recentEntries = moods.where((m) {
-      // Use createdAt property - change this if your MoodEntry uses a different name
       final daysSince = DateTime.now().difference(m.createdAt).inDays;
       return daysSince <= 7;
     }).length;
@@ -136,7 +125,6 @@ class GentleInsightsService {
     return null;
   }
 
-  /// Warm message when there's no data
   String _getWarmEmptyStateMessage() {
     final messages = [
       "Your garden is here whenever you need it. No pressure, no rush. 🌿",
@@ -147,7 +135,6 @@ class GentleInsightsService {
     return messages[DateTime.now().hour % messages.length];
   }
 
-  /// Get a daily gentle reflection (not a task, an invitation)
   String getDailyReflection() {
     final reflections = [
       "How are you feeling in this moment? 💭",
@@ -161,7 +148,6 @@ class GentleInsightsService {
     return reflections[DateTime.now().weekday % reflections.length];
   }
 
-  /// Generate insight based on time of day (gentle, not prescriptive)
   String getTimeBasedGreeting() {
     final hour = DateTime.now().hour;
 

@@ -1,14 +1,7 @@
 // models/settings_model.dart
-// 用户设置数据模型 ⚙️
-// ✅ FIXED: 移除 ReminderTime.isEnabled（冗余字段，与外层 bool 不同步）
-// ✅ FIXED: 统一由 NotificationSettings 的 xxxEnabled 控制开关状态
-// ✅ IMPROVED: 添加注释说明设计决策
 
 import 'package:flutter/material.dart';
 
-/// 提醒时间模型
-/// ⚠️ 注意：isEnabled 已移除，统一由 NotificationSettings 的对应 bool 控制。
-///    这里只存储 hour / minute，避免两处 bool 不同步的 bug。
 class ReminderTime {
   final int hour;
   final int minute;
@@ -20,7 +13,7 @@ class ReminderTime {
 
   factory ReminderTime.fromMap(Map<String, dynamic> map) {
     return ReminderTime(
-      hour: (map['hour'] ?? 9).clamp(0, 23),     // ✅ 防止非法时间值
+      hour: (map['hour'] ?? 9).clamp(0, 23),
       minute: (map['minute'] ?? 0).clamp(0, 59),
     );
   }
@@ -32,10 +25,8 @@ class ReminderTime {
     };
   }
 
-  /// 转换为 TimeOfDay（用于 TimePicker）
   TimeOfDay toTimeOfDay() => TimeOfDay(hour: hour, minute: minute);
 
-  /// 从 TimeOfDay 创建新的 ReminderTime
   ReminderTime withTimeOfDay(TimeOfDay time) {
     return ReminderTime(
       hour: time.hour,
@@ -53,7 +44,6 @@ class ReminderTime {
     );
   }
 
-  /// 格式化显示时间 (e.g. "09:00 AM")
   String get formatted {
     final h = hour % 12 == 0 ? 12 : hour % 12;
     final m = minute.toString().padLeft(2, '0');
@@ -76,8 +66,6 @@ class ReminderTime {
   String toString() => 'ReminderTime($formatted)';
 }
 
-/// 通知设置模型
-/// ✅ 每种提醒的 enabled 状态统一在这里管理，不在 ReminderTime 内重复存储。
 class NotificationSettings {
   final bool habitRemindersEnabled;
   final ReminderTime habitReminderTime;
@@ -184,10 +172,9 @@ class NotificationSettings {
 }
 
 const _sentinel = Object();
-/// 完整的用户设置模型
 class AppSettings {
   final NotificationSettings notifications;
-  final String? locale; // 语言（预留）
+  final String? locale;
 
 
   const AppSettings({
@@ -216,7 +203,7 @@ class AppSettings {
 
   AppSettings copyWith({
     NotificationSettings? notifications,
-    Object? locale = _sentinel,  // ← sentinel 模式
+    Object? locale = _sentinel,
   }) {
     return AppSettings(
       notifications: notifications ?? this.notifications,

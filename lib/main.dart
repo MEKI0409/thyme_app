@@ -1,9 +1,4 @@
 // main.dart
-// ✅ FIXED: 使用可爱风格主题 CuteTheme
-// ✅ FIXED: 添加 SettingsController import + 登录后自动加载设置
-// ✅ FIXED: 加入 onboarding 检查流程
-// ✅ FIXED: 防止 SettingsController.loadSettings 重复调用
-// ✅ FIXED: shouldShowOnboarding 需要从 onboarding_screen.dart 导入
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -29,8 +24,6 @@ import 'utils/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // ✅ FIX: Firebase 初始化失败时不再静默继续，而是显示错误页面
   bool firebaseReady = await _initializeFirebase();
   _setupErrorHandling();
 
@@ -41,7 +34,6 @@ void main() async {
   }
 }
 
-/// ✅ FIX: 返回 bool 表示是否成功
 Future<bool> _initializeFirebase() async {
   try {
     await Firebase.initializeApp();
@@ -63,7 +55,6 @@ Future<bool> _initializeFirebase() async {
   }
 }
 
-/// ✅ FIX: Firebase 初始化失败时的降级页面
 class _FirebaseErrorApp extends StatelessWidget {
   const _FirebaseErrorApp();
 
@@ -163,7 +154,6 @@ class MyApp extends StatelessWidget {
           if (kDebugMode) _DebugNavigatorObserver(),
         ],
         builder: (context, child) {
-          // ✅ FIXED: 更安全的 textScaler clamp 写法
           final currentScale = MediaQuery.of(context).textScaler.scale(1.0);
           final clampedScale = currentScale.clamp(0.8, 1.3);
           return MediaQuery(
@@ -178,7 +168,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// App 入口点：处理 SplashScreen -> Onboarding -> Auth 流程
+/// App SplashScreen -> Onboarding -> Auth
 class AppEntry extends StatefulWidget {
   const AppEntry({Key? key}) : super(key: key);
 
@@ -189,7 +179,7 @@ class AppEntry extends StatefulWidget {
 class _AppEntryState extends State<AppEntry> {
   bool _showSplash = true;
 
-  // Onboarding 检查状态
+  // Onboarding 檢查狀態
   bool _checkingOnboarding = true;
   bool _needsOnboarding = false;
 
@@ -205,10 +195,7 @@ class _AppEntryState extends State<AppEntry> {
     }
   }
 
-  // ✅ FIXED: shouldShowOnboarding 应从 onboarding_screen.dart 导出
-  // 如果 onboarding_screen.dart 没有导出该函数，请在该文件中添加:
-  //   Future<bool> shouldShowOnboarding() async { ... }
-  // 或在本文件中定义一个本地版本。
+
   Future<void> _checkOnboardingStatus() async {
     try {
       final needs = await shouldShowOnboarding();
@@ -219,7 +206,6 @@ class _AppEntryState extends State<AppEntry> {
         });
       }
     } catch (e) {
-      // ✅ FIXED: 如果检查失败，不卡在 loading 页面
       if (kDebugMode) {
         debugPrint('❌ Onboarding check failed: $e');
       }
@@ -234,12 +220,12 @@ class _AppEntryState extends State<AppEntry> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. 显示启动页
+    // 1. 啟動頁
     if (_showSplash) {
       return SplashScreen(onComplete: _onSplashComplete);
     }
 
-    // 2. 正在检查 onboarding 状态 — 显示简单 loading
+    // 2. 檢查 onboarding
     if (_checkingOnboarding) {
       return Scaffold(
         body: Container(
@@ -268,10 +254,10 @@ class _AppEntryState extends State<AppEntry> {
       return const OnboardingScreen();
     }
 
-    // 4. Onboarding 已完成，检查登录状态
+    // 4. Onboarding 完成，檢查登錄狀態
     return Consumer<AuthController>(
       builder: (context, authController, child) {
-        // 正在检查认证状态
+        // 檢查認證狀態
         if (authController.isLoading) {
           return Scaffold(
             body: Container(
@@ -319,7 +305,7 @@ class _AppEntryState extends State<AppEntry> {
   }
 }
 
-/// Debug 导航观察器
+/// Debug
 class _DebugNavigatorObserver extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {

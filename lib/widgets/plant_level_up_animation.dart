@@ -1,15 +1,12 @@
 // widgets/plant_level_up_animation.dart
-// 🎉 植物升级庆祝动画 - 修复黑屏版
-// 当植物升级时显示庆祝效果
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' as math;
 import '../utils/theme.dart';
-import '../utils/constants.dart'; // ✅ ADDED: for unified getPlantStageName
+import '../utils/constants.dart';
 import 'cute_garden_icons.dart';
 
-/// 植物升级庆祝动画
 class PlantLevelUpAnimation {
   static void show(
       BuildContext context, {
@@ -19,7 +16,7 @@ class PlantLevelUpAnimation {
       }) {
     showGeneralDialog(
       context: context,
-      barrierDismissible: false, // ✅ 改为 false，防止点击背景与 onTap 冲突导致双重 pop
+      barrierDismissible: false,
       barrierLabel: 'Dismiss',
       barrierColor: Colors.black.withValues(alpha: 0.7),
       transitionDuration: const Duration(milliseconds: 400),
@@ -75,13 +72,12 @@ class _LevelUpAnimationContentState extends State<_LevelUpAnimationContent>
   final math.Random _random = math.Random();
 
   bool _showContent = false;
-  bool _dismissed = false; // ✅ 防止多次关闭
+  bool _dismissed = false;
 
   @override
   void initState() {
     super.initState();
 
-    // 脉冲动画
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
@@ -91,27 +87,25 @@ class _LevelUpAnimationContentState extends State<_LevelUpAnimationContent>
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    // 粒子动画
+    // 粒子動畫
     _particleController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
 
-    // 生成粒子
     _generateParticles();
 
-    // 启动动画序列
     _startAnimation();
   }
 
   void _generateParticles() {
     final colors = [
-      const Color(0xFFFFD54F), // 金色
-      const Color(0xFFFF69B4), // 粉红
-      const Color(0xFF9DD4B0), // 薄荷绿
-      const Color(0xFFD4B8E0), // 薰衣草
-      const Color(0xFF90CAF9), // 天蓝
-      const Color(0xFFFFCC80), // 暖橙
+      const Color(0xFFFFD54F),
+      const Color(0xFFFF69B4),
+      const Color(0xFF9DD4B0),
+      const Color(0xFFD4B8E0),
+      const Color(0xFF90CAF9),
+      const Color(0xFFFFCC80),
     ];
 
     for (int i = 0; i < 30; i++) {
@@ -127,16 +121,15 @@ class _LevelUpAnimationContentState extends State<_LevelUpAnimationContent>
 
   void _startAnimation() async {
     await Future.delayed(const Duration(milliseconds: 100));
-    if (!mounted) return; // ✅ 提前返回
+    if (!mounted) return;
     setState(() => _showContent = true);
     _particleController.forward();
 
-    // 3秒后自动关闭
+    // 三秒自動關閉
     await Future.delayed(const Duration(seconds: 3));
-    _safeDismiss(); // ✅ 使用安全关闭方法
+    _safeDismiss();
   }
 
-  // ✅ 安全关闭方法，确保只调用一次
   void _safeDismiss() {
     if (!mounted || _dismissed) return;
     _dismissed = true;
@@ -155,7 +148,7 @@ class _LevelUpAnimationContentState extends State<_LevelUpAnimationContent>
     return Material(
       color: Colors.transparent,
       child: GestureDetector(
-        onTap: _safeDismiss, // ✅ 使用安全关闭方法
+        onTap: _safeDismiss,
         behavior: HitTestBehavior.opaque,
         child: Stack(
           children: [
@@ -177,13 +170,10 @@ class _LevelUpAnimationContentState extends State<_LevelUpAnimationContent>
               },
             ),
 
-            // 主内容
             Center(
               child: AnimatedOpacity(
                 opacity: _showContent ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 300),
-                // ✅ FIXED: Constrain width and clip to prevent elasticOut
-                // scale animation from overflowing on small screens
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
                     maxWidth: MediaQuery.of(context).size.width - 40,
@@ -268,7 +258,6 @@ class _LevelUpAnimationContentState extends State<_LevelUpAnimationContent>
     return Column(
       children: [
         // LEVEL UP!
-        // ✅ FIXED: FittedBox prevents right overflow on small screens
         FittedBox(
           fit: BoxFit.scaleDown,
           child: ShaderMask(
@@ -293,8 +282,7 @@ class _LevelUpAnimationContentState extends State<_LevelUpAnimationContent>
 
         const SizedBox(height: 16),
 
-        // 等级变化
-        // ✅ FIXED: FittedBox prevents overflow with elasticOut animation
+        // 等級變化
         FittedBox(
           fit: BoxFit.scaleDown,
           child: Container(
@@ -349,7 +337,6 @@ class _LevelUpAnimationContentState extends State<_LevelUpAnimationContent>
 
         const SizedBox(height: 12),
 
-        // 植物阶段名称 - ✅ FIXED: Use Constants for consistency
         Text(
           '${_getPlantEmoji(widget.newLevel)} ${Constants.getPlantStageName(widget.newLevel)}',
           style: GoogleFonts.poppins(
@@ -362,7 +349,6 @@ class _LevelUpAnimationContentState extends State<_LevelUpAnimationContent>
     );
   }
 
-  /// ✅ FIXED: Only emoji lookup remains here, name comes from Constants
   String _getPlantEmoji(int level) {
     if (level <= 0) return '🌱';
     if (level <= 2) return '🌿';
@@ -390,7 +376,6 @@ class _ConfettiParticle {
   });
 }
 
-// 粒子绘制器
 class _ConfettiPainter extends CustomPainter {
   final List<_ConfettiParticle> particles;
   final double progress;
@@ -411,7 +396,7 @@ class _ConfettiPainter extends CustomPainter {
 
       // 淡出
       final opacity = (1 - progress * 0.7).clamp(0.0, 1.0);
-      // 缩放
+      // 縮放
       final scale = progress < 0.2 ? progress / 0.2 : 1.0;
 
       final paint = Paint()

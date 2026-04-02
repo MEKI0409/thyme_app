@@ -1,7 +1,4 @@
 // pages/profile_settings_page.dart
-// 个人资料设置页面 👤
-// ✅ 编辑头像、昵称，查看邮箱
-// ✅ FIXED (v2): initState 中的 context.read 移到 didChangeDependencies
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -21,17 +18,15 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   final _nameFocusNode = FocusNode();
   bool _isEditingName = false;
   String? _originalName;
-  String? _selectedAvatar; // ✅ NEW: 本地头像状态，避免依赖异步 Auth 刷新
-  bool _isInitialized = false; // ✅ FIXED (v2): 防止 didChangeDependencies 重复初始化
+  String? _selectedAvatar;
+  bool _isInitialized = false;
 
-  // 可选头像列表（emoji 方式，无需文件上传）
   static const List<String> _avatarEmojis = [
     '🌱', '🌿', '🌸', '🌻', '🌺', '🌳',
     '🦋', '🐰', '🐱', '🐶', '🌙', '⭐',
     '🍀', '🌈', '💚', '🌊', '🎨', '🎵',
   ];
 
-  // ✅ FIXED (v2): 移到 didChangeDependencies，安全使用 context
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -42,7 +37,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       _originalName = userModel?.displayName ?? user?.displayName ?? '';
       _nameController.text = _originalName!;
 
-      // ✅ 初始化头像：从 Firebase Auth 读取
       final photoUrl = user?.photoURL;
       if (photoUrl != null && photoUrl.startsWith('emoji:')) {
         _selectedAvatar = photoUrl.replaceFirst('emoji:', '');
@@ -83,9 +77,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
-          // ═══════════════════════════════════════════
-          // 头像区域
-          // ═══════════════════════════════════════════
           Center(
             child: Column(
               children: [
@@ -146,9 +137,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
           const SizedBox(height: 32),
 
-          // ═══════════════════════════════════════════
-          // 昵称编辑
-          // ═══════════════════════════════════════════
           _buildSectionLabel('Display Name'),
           const SizedBox(height: 8),
           Container(
@@ -192,7 +180,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
             ),
           ),
 
-          // ✅ 保存按钮（名字有变更时显示）
           if (_isEditingName) ...[
             const SizedBox(height: 16),
             SizedBox(
@@ -233,9 +220,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
           const SizedBox(height: 24),
 
-          // ═══════════════════════════════════════════
-          // 邮箱（只读）
-          // ═══════════════════════════════════════════
           _buildSectionLabel('Email'),
           const SizedBox(height: 8),
           Container(
@@ -268,9 +252,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
           const SizedBox(height: 24),
 
-          // ═══════════════════════════════════════════
-          // 账户信息
-          // ═══════════════════════════════════════════
           _buildSectionLabel('Account Info'),
           const SizedBox(height: 8),
           Container(
@@ -327,9 +308,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // 操作
-  // ═══════════════════════════════════════════════════════════════════════════
 
   Future<void> _saveName(SettingsController controller) async {
     final newName = _nameController.text.trim();
@@ -344,7 +322,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
       });
       _nameFocusNode.unfocus();
 
-      // ✅ 通知 AuthController 刷新，确保其他页面也能看到新名字
       if (mounted) {
         await context.read<AuthController>().reloadUser();
       }
@@ -397,16 +374,13 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
               itemCount: _avatarEmojis.length,
               itemBuilder: (_, index) {
                 final emoji = _avatarEmojis[index];
-                final isSelected = _selectedAvatar == emoji; // ✅ 高亮当前选中
+                final isSelected = _selectedAvatar == emoji;
                 return GestureDetector(
                   onTap: () async {
                     Navigator.pop(ctx);
-                    // ✅ 先更新本地状态，UI 立即响应
                     setState(() {
                       _selectedAvatar = emoji;
                     });
-                    // ✅ FIXED (v4): 在 async 操作前捕获 controller 引用
-                    // 即使 widget 被 unmount，保存和刷新仍能完成
                     final settingsCtrl = context.read<SettingsController>();
                     final authCtrl = context.read<AuthController>();
                     await settingsCtrl.updatePhotoUrl('emoji:$emoji');
@@ -443,12 +417,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // UI 组件
-  // ═══════════════════════════════════════════════════════════════════════════
 
   String _getAvatarDisplay(User? user, String displayName) {
-    // ✅ 优先使用本地状态（即时响应）
     if (_selectedAvatar != null) {
       return _selectedAvatar!;
     }

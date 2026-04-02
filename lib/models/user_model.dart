@@ -1,5 +1,4 @@
 // models/user_model.dart
-// ✅ IMPROVED: Safe timestamp parsing, copyWith, additional fields
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -22,7 +21,6 @@ class UserModel {
     this.lastActiveAt,
   });
 
-  /// ✅ FIXED: Safe parsing of timestamps from Firestore
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
       uid: map['uid'] ?? '',
@@ -39,7 +37,6 @@ class UserModel {
     );
   }
 
-  /// ✅ NEW: Safe DateTime parsing that handles multiple formats
   static DateTime _parseDateTime(dynamic value) {
     if (value == null) return DateTime.now();
 
@@ -70,7 +67,6 @@ class UserModel {
     };
   }
 
-  /// ✅ NEW: copyWith method for immutable updates
   UserModel copyWith({
     String? uid,
     String? email,

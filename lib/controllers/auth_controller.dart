@@ -1,5 +1,4 @@
 // controllers/auth_controller.dart
-// ✅ FIXED: 修复异常类型，添加密码重置、邮箱验证功能
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,7 +14,6 @@ class AuthController extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
-  // ✅ 保存订阅以便取消
   StreamSubscription<User?>? _authSubscription;
   StreamSubscription? _userDocSubscription;
 
@@ -25,7 +23,6 @@ class AuthController extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _currentUser != null;
 
-  // ✅ 检查邮箱是否已验证
   bool get isEmailVerified => _currentUser?.emailVerified ?? false;
 
   AuthController() {
@@ -74,7 +71,6 @@ class AuthController extends ChangeNotifier {
       notifyListeners();
       return true;
     } on FirebaseAuthException catch (e) {
-      // ✅ FIXED: FirebaseAuthException 是正确的类型
       _isLoading = false;
       _errorMessage = _getErrorMessage(e.code);
       notifyListeners();
@@ -112,7 +108,6 @@ class AuthController extends ChangeNotifier {
         userModel.toMap(),
       );
 
-      // ✅ FIXED: 直接使用 userCredential.user 发送验证邮件，避免依赖异步 auth listener
       try {
         if (userCredential.user != null && !userCredential.user!.emailVerified) {
           await userCredential.user!.sendEmailVerification();
@@ -138,7 +133,6 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// ✅ 发送密码重置邮件
   Future<bool> sendPasswordResetEmail(String email) async {
     try {
       _isLoading = true;
@@ -163,7 +157,6 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// ✅ 发送邮箱验证
   Future<bool> sendEmailVerification() async {
     try {
       if (_currentUser != null && !_currentUser!.emailVerified) {
@@ -177,7 +170,6 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// ✅ 重新加载用户以检查邮箱验证状态
   Future<void> reloadUser() async {
     try {
       await _currentUser?.reload();
@@ -188,14 +180,12 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// ✅ 更新显示名称
   Future<bool> updateDisplayName(String displayName) async {
     try {
       if (_currentUser == null) return false;
 
       await _currentUser!.updateDisplayName(displayName);
 
-      // 同时更新 Firestore
       await _firebaseService.updateUserDocument(
         _currentUser!.uid,
         {'displayName': displayName},
@@ -209,7 +199,6 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  /// ✅ 更新密码
   Future<bool> updatePassword(String currentPassword, String newPassword) async {
     try {
       if (_currentUser == null || _currentUser!.email == null) return false;
@@ -218,14 +207,12 @@ class AuthController extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      // 重新认证用户
       final credential = EmailAuthProvider.credential(
         email: _currentUser!.email!,
         password: currentPassword,
       );
       await _currentUser!.reauthenticateWithCredential(credential);
 
-      // 更新密码
       await _currentUser!.updatePassword(newPassword);
 
       _isLoading = false;
@@ -245,15 +232,15 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    _userDocSubscription?.cancel(); // ✅ FIXED: 先取消订阅再登出
+    _userDocSubscription?.cancel();
     await _firebaseService.signOut();
     _currentUser = null;
     _userModel = null;
-    _errorMessage = null; // ✅ FIXED: 清除残留错误信息
+    _errorMessage = null;
     notifyListeners();
   }
 
-  /// ✅ 删除账户
+
   Future<bool> deleteAccount(String password) async {
     try {
       if (_currentUser == null || _currentUser!.email == null) return false;
@@ -262,22 +249,15 @@ class AuthController extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      // 重新认证用户
       final credential = EmailAuthProvider.credential(
         email: _currentUser!.email!,
         password: password,
       );
       await _currentUser!.reauthenticateWithCredential(credential);
-
-      // ✅ FIXED: 保存 uid，先删账户再清理数据
-      // 如果账户删除失败，用户数据保持完整可重试
-      // 如果数据清理失败，仅留下孤儿数据（可由后端清理）
       final uid = _currentUser!.uid;
 
-      // 先删除用户账户（不可逆操作）
       await _currentUser!.delete();
 
-      // 再清理 Firestore 数据（best effort）
       try {
         await _firebaseService.deleteUserData(uid);
       } catch (e) {
@@ -336,7 +316,6 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  // ✅ 正确取消所有订阅
   @override
   void dispose() {
     _authSubscription?.cancel();

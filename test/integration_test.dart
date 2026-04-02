@@ -1,11 +1,4 @@
 // test/integration_test.dart
-// ============================================================================
-// THYME APP - INTEGRATION TESTS
-// ============================================================================
-// ✅ IMPROVED: 修复service import，使用统一的Constants
-// ✅ IMPROVED: 添加更完整的端到端场景测试
-// ✅ IMPROVED: 增强错误处理和边界条件测试
-// ============================================================================
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:thyme_app/models/habit_model.dart';
@@ -35,9 +28,7 @@ void main() {
       insightsService = GentleInsightsService();
     });
 
-    // ========================================================================
-    // SCENARIO 1: Complete Habit Workflow
-    // ========================================================================
+    // Complete Habit Workflow
     group('Scenario: Complete Habit Workflow', () {
       test('INT-1.1: Habit completion should generate correct rewards using Constants', () {
         // GIVEN: A Mindfulness habit
@@ -55,39 +46,31 @@ void main() {
       });
 
       test('INT-1.2: Rewards should correctly update garden resources', () {
-        // GIVEN: A garden with initial resources
         final initialGarden = GardenState.initial('test_user');
         final initialWater = initialGarden.waterDrops;
         final initialSunlight = initialGarden.sunlightPoints;
 
-        // AND: An Exercise habit
+
         final rewards = Constants.calculateHabitReward(
           category: 'Exercise',
           currentStreak: 0,
         );
-
-        // WHEN: Adding rewards to garden
         final updatedGarden = initialGarden.addResources(
           water: rewards['water']!,
           sunlight: rewards['sunlight']!,
         );
 
-        // THEN: Garden resources should increase
         expect(updatedGarden.waterDrops, equals(initialWater + rewards['water']!));
         expect(updatedGarden.sunlightPoints, equals(initialSunlight + rewards['sunlight']!));
       });
 
       test('INT-1.3: Garden should grow when resources are sufficient', () {
-        // GIVEN: A garden with enough resources to grow
-        // Level 0→1 needs: water = 10, sunlight = 5
         var garden = _createTestGarden(level: 0, water: 15, sunlight: 10);
 
         expect(garden.canGrow(), isTrue);
 
-        // WHEN: Growing using tryGrow()
         final grownGarden = garden.tryGrow();
 
-        // THEN: Level increases, resources decrease
         expect(grownGarden, isNotNull);
         expect(grownGarden!.plantLevel, equals(1));
         expect(grownGarden.waterDrops, equals(15 - 10));
@@ -110,7 +93,6 @@ void main() {
           longestStreak: 1,
         );
 
-        // THEN: Should NOT be able to claim reward again
         expect(habit.canClaimReward(), isFalse,
             reason: 'ANTI-EXPLOIT: Cannot claim reward twice');
       });
@@ -124,7 +106,7 @@ void main() {
         final rewards = Constants.calculateHabitReward(
           category: habit.category,
           currentStreak: habit.currentStreak,
-          currentMood: 'anxious', // Mindfulness is therapeutic for anxious
+          currentMood: 'anxious',
         );
 
         // AND: Adding rewards to garden
@@ -133,34 +115,26 @@ void main() {
           sunlight: rewards['sunlight']!,
         );
 
-        // THEN: Garden should have increased resources
         expect(garden.waterDrops, greaterThan(5));
         expect(garden.sunlightPoints, greaterThan(3));
 
-        // AND: Special unlock should be available
         final specialUnlock = Constants.checkSpecialUnlock('anxious', 'Mindfulness');
         expect(specialUnlock, equals('#64B5F6'));
       });
     });
 
-    // ========================================================================
-    // SCENARIO 2: Mood Analysis → Garden Response Flow
-    // ========================================================================
+    // Mood Analysis → Garden Response Flow
     group('Scenario: Mood Analysis → Garden Response Flow', () {
       test('INT-2.1: Anxious mood should trigger breathing guide', () {
-        // GIVEN: Detected anxious mood
         const detectedMood = 'anxious';
 
-        // WHEN: Getting garden ambiance
         final ambiance = moodGardenService.getGardenAmbiance(detectedMood);
 
-        // THEN: Should show breathing guide
         expect(ambiance.showBreathingGuide, isTrue,
             reason: 'Anxious mood should show breathing guide');
       });
 
       test('INT-2.2: Therapeutic habit should unlock special color', () {
-        // Test all therapeutic pairs
         final therapeuticPairs = {
           'anxious_Mindfulness': '#64B5F6',
           'sad_Social': '#FFD54F',
@@ -191,13 +165,10 @@ void main() {
           _createTestHabit(category: 'Creative', streak: 2),
         ];
 
-        // WHEN: Getting recommendations
         final recommendations = recommendationService.recommendHabits(currentMood, habits);
 
-        // THEN: Should prioritize therapeutic categories
         expect(recommendations, isNotEmpty);
 
-        // Exercise and Mindfulness are recommended for stressed
         final recommendedCategories = Constants.getRecommendedCategories(currentMood);
         expect(recommendedCategories, contains('Exercise'));
         expect(recommendedCategories, contains('Mindfulness'));
@@ -215,9 +186,6 @@ void main() {
       });
     });
 
-    // ========================================================================
-    // SCENARIO 3: User Return Flow (Anti-Streak-Anxiety)
-    // ========================================================================
     group('Scenario: User Return Flow (Anti-Streak-Anxiety)', () {
       test('INT-3.1: Returning user receives rest bonus', () {
         final testCases = {
@@ -276,10 +244,8 @@ void main() {
 
         expect(restingGarden.isResting, isTrue);
 
-        // WHEN: User visits
         final activeGarden = restingGarden.markVisited();
 
-        // THEN: Status should change to active
         expect(activeGarden.gardenStatus, equals('active'));
         expect(activeGarden.lastVisited.day, equals(DateTime.now().day));
       });
@@ -297,16 +263,12 @@ void main() {
       });
     });
 
-    // ========================================================================
-    // SCENARIO 4: Journal Entry Flow
-    // ========================================================================
     group('Scenario: Journal Entry Flow', () {
       test('INT-4.1: Journal prompts should be available for all moods', () {
         for (final mood in Constants.allMoods) {
           final prompt = JournalPromptsService.getPromptForMood(mood);
 
           expect(prompt, isNotEmpty);
-          // Prompts should not be overly aggressive
           expect(prompt.contains('!'), isFalse,
               reason: 'Prompts should not use exclamation marks');
         }
@@ -330,14 +292,10 @@ void main() {
       });
 
       test('INT-4.3: Journal should reward garden', () {
-        // GIVEN: A garden
         var garden = _createTestGarden(level: 2, water: 20, sunlight: 15);
         final initialWater = garden.waterDrops;
         final initialSunlight = garden.sunlightPoints;
 
-        // WHEN: User completes a journal entry
-        // Base journal reward: 1 water, 1 sunlight
-        // Extra water for expressing difficult emotions
         const journalWater = 2; // expressing 'anxious' gives +1
         const journalSunlight = 1;
 
@@ -349,9 +307,6 @@ void main() {
       });
     });
 
-    // ========================================================================
-    // SCENARIO 5: Gentle Insights Generation
-    // ========================================================================
     group('Scenario: Gentle Insights Generation', () {
       test('INT-5.1: Insights should be non-prescriptive', () {
         final habits = [
@@ -373,10 +328,8 @@ void main() {
           ),
         ];
 
-        // WHEN: Generating insight
         final insight = insightsService.generateInsight([completedHabit], moods);
 
-        // THEN: Should NOT contain prescriptive language
         expect(insight, isNotEmpty);
 
         final prescriptivePhrases = ['you should', 'you need to', 'try to', 'you must'];
@@ -404,9 +357,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // SCENARIO 6: Plant Growth Progression
-    // ========================================================================
+
     group('Scenario: Plant Growth Progression', () {
       test('INT-6.1: Full growth cycle from level 0 to max', () {
         var garden = _createTestGarden(level: 0, water: 1000, sunlight: 500);
@@ -458,9 +410,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // SCENARIO 7: Color Unlock System
-    // ========================================================================
+
     group('Scenario: Color Unlock System', () {
       test('INT-7.1: Initial garden should have default color unlocked', () {
         final garden = GardenState.initial('test_user');
@@ -521,9 +472,7 @@ void main() {
   });
 }
 
-// ============================================================================
 // HELPER FUNCTIONS
-// ============================================================================
 
 Habit _createTestHabit({
   String category = 'Self-Care',

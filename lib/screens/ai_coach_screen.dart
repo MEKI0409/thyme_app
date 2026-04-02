@@ -1,18 +1,16 @@
 // screens/ai_coach_screen.dart
-// Forest Spirit Fern - Gentle AI Companion
-// Using shared widget library
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart'; // ✅ NEW: Access controllers
+import 'package:provider/provider.dart';
 import '../services/gemini_service.dart';
-import '../controllers/mood_controller.dart'; // ✅ NEW: Current mood
-import '../controllers/habit_controller.dart'; // ✅ NEW: Habit data
-import '../controllers/garden_controller.dart'; // ✅ NEW: Garden data + rewards
-import '../controllers/auth_controller.dart'; // ✅ NEW: User ID for rewards
+import '../controllers/mood_controller.dart';
+import '../controllers/habit_controller.dart';
+import '../controllers/garden_controller.dart';
+import '../controllers/auth_controller.dart';
 import '../models/chat_message_model.dart';
 import '../utils/theme.dart';
-import '../utils/date_utils.dart'; // ✅ NEW: Time-based greetings
+import '../utils/date_utils.dart';
 import '../widgets/cute_garden_icons.dart';
 import 'dart:math' as math;
 
@@ -34,20 +32,18 @@ class _AICoachScreenState extends State<AICoachScreen>
   bool _isTyping = false;
   bool _isOffline = false;
 
-  // ✅ NEW Priority 4: Chat reward tracking
-  int _meaningfulExchanges = 0; // Count of user messages this session
-  bool _rewardedThisSession = false; // Only reward once per session
-  static const int _rewardThreshold = 3; // Messages needed before reward
+  int _meaningfulExchanges = 0;
+  bool _rewardedThisSession = false;
+  static const int _rewardThreshold = 3;
 
   late AnimationController _typingController;
   late AnimationController _floatController;
   late Animation<double> _floatAnimation;
 
-  // Spirit name and personality
   static const String _spiritName = 'Fern';
   static const String _spiritEmoji = '🌿';
 
-  bool _isInitialized = false; // ✅ FIX: 防止 didChangeDependencies 重复调用
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -56,7 +52,6 @@ class _AICoachScreenState extends State<AICoachScreen>
     _checkServiceStatus();
   }
 
-  // ✅ FIX: 从 initState 移到 didChangeDependencies，安全使用 context.read
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -89,7 +84,6 @@ class _AICoachScreenState extends State<AICoachScreen>
   }
 
   void _addWelcomeMessage() {
-    // ✅ NEW: Context-aware welcome message
     String welcomeText;
 
     try {
@@ -116,7 +110,6 @@ class _AICoachScreenState extends State<AICoachScreen>
             "How are you feeling right now? 🍃";
       }
     } catch (e) {
-      // Fallback if providers not available yet
       welcomeText = "Hi there~ ✨\n\n"
           "I'm $_spiritName, a forest spirit who lives in your garden. "
           "I'm here to keep you company, not to judge or give advice.\n\n"
@@ -129,7 +122,6 @@ class _AICoachScreenState extends State<AICoachScreen>
   }
 
   Future<void> _sendMessage() async {
-    // ✅ FIXED (v3): 防止并发发送导致消息乱序
     if (_isTyping) return;
 
     final text = _messageController.text.trim();
@@ -142,13 +134,12 @@ class _AICoachScreenState extends State<AICoachScreen>
     setState(() {
       _messages.add(userMessage);
       _isTyping = true;
-      _meaningfulExchanges++; // ✅ NEW: Track exchanges for reward
+      _meaningfulExchanges++;
     });
 
     _scrollToBottom();
 
     try {
-      // ✅ NEW Priority 1: Gather context from controllers
       String? currentMood;
       int? habitsCompletedToday;
       int? totalHabits;
@@ -169,7 +160,6 @@ class _AICoachScreenState extends State<AICoachScreen>
         debugPrint('📋 Context gathering failed (non-fatal): $e');
       }
 
-      // ✅ NEW: Send message WITH context
       final response = await _geminiService.chatWithContext(
         text,
         currentMood: currentMood,
@@ -185,8 +175,6 @@ class _AICoachScreenState extends State<AICoachScreen>
           _isTyping = false;
         });
         _scrollToBottom();
-
-        // ✅ NEW Priority 4: Reward garden after meaningful exchanges
         _checkAndRewardChat();
       }
     } catch (e) {
@@ -208,7 +196,6 @@ class _AICoachScreenState extends State<AICoachScreen>
     }
   }
 
-  /// ✅ NEW Priority 4: Reward garden for meaningful chat sessions
   void _checkAndRewardChat() {
     if (_rewardedThisSession) return;
     if (_meaningfulExchanges < _rewardThreshold) return;
@@ -285,7 +272,7 @@ class _AICoachScreenState extends State<AICoachScreen>
               Navigator.pop(context);
               setState(() {
                 _messages.clear();
-                _meaningfulExchanges = 0; // ✅ NEW: Reset reward tracking
+                _meaningfulExchanges = 0;
                 _rewardedThisSession = false;
                 _addWelcomeMessage();
               });
@@ -675,7 +662,6 @@ class _AICoachScreenState extends State<AICoachScreen>
   }
 
   Widget _buildSuggestedPrompts() {
-    // ✅ NEW Priority 2: Dynamic suggestion chips based on context
     final prompts = _getDynamicPrompts();
 
     return Container(
@@ -745,7 +731,6 @@ class _AICoachScreenState extends State<AICoachScreen>
     );
   }
 
-  /// ✅ NEW Priority 2: Generate context-aware suggestion prompts
   List<(String, String)> _getDynamicPrompts() {
     try {
       final moodCtrl = context.read<MoodController>();
@@ -761,14 +746,12 @@ class _AICoachScreenState extends State<AICoachScreen>
 
       final prompts = <(String, String)>[];
 
-      // Time-based prompt
       if (hour < 12) {
         prompts.add(('How should I start my day?', '🌅'));
       } else if (hour >= 21) {
         prompts.add(('Help me wind down for tonight', '🌙'));
       }
 
-      // Mood-based prompts
       if (mood == 'anxious' || mood == 'stressed') {
         prompts.add(('Can we do a breathing exercise?', '🫁'));
         prompts.add(('Everything feels overwhelming', '😰'));
@@ -780,25 +763,20 @@ class _AICoachScreenState extends State<AICoachScreen>
         prompts.add(('What should I try next?', '🚀'));
       }
 
-      // Habit-based prompts
       if (completedToday > 0 && completedToday == totalHabits && totalHabits > 0) {
         prompts.add(('I finished all my habits today!', '🎉'));
       } else if (pendingHabits.isNotEmpty) {
         prompts.add(('What habit should I do next?', '🎯'));
       }
 
-      // Garden-based prompt
       if (plantLevel >= 5) {
         prompts.add(('How\'s my garden doing?', '🌿'));
       }
 
-      // Always include a casual chat option
       prompts.add(('Just want to chat~', '💬'));
 
-      // Return max 4 prompts
       return prompts.take(4).toList();
     } catch (e) {
-      // Fallback to static prompts if controllers not available
       return [
         ('I\'m feeling a bit down today', '🥺'),
         ('Just want to chat~', '💬'),

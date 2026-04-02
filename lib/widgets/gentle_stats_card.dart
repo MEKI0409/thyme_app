@@ -1,12 +1,10 @@
 // widgets/gentle_stats_card.dart
-// ✅ IMPROVED: Calm Gamification - Non-judgmental statistics display
-// Shows observations, not achievements or failures
 
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 import '../utils/date_utils.dart';
 
-/// Gentle stats card - displays statistics without judgment
+/// Gentle stats card
 class GentleStatsCard extends StatelessWidget {
   final String title;
   final String value;
@@ -129,7 +127,6 @@ class GentleStatsCard extends StatelessWidget {
   }
 }
 
-/// Gentle insight card - shows observations without judgment
 class GentleInsightCard extends StatelessWidget {
   final String insight;
   final String? emoji;
@@ -199,7 +196,7 @@ class GentleInsightCard extends StatelessWidget {
   }
 }
 
-/// Mood reflection card - shows mood without judgment
+/// Mood reflection card
 class MoodReflectionCard extends StatelessWidget {
   final String mood;
   final String message;
@@ -295,8 +292,6 @@ class MoodReflectionCard extends StatelessWidget {
   }
 }
 
-/// Progress visualization - gentle, no judgment
-/// Uses plant growth metaphor instead of percentages
 class GentleProgressWidget extends StatelessWidget {
   final double progress; // 0.0 to 1.0
   final String label;
@@ -313,7 +308,6 @@ class GentleProgressWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Plant growth visualization instead of bar
         SizedBox(
           height: 60,
           child: Row(
@@ -337,7 +331,6 @@ class GentleProgressWidget extends StatelessWidget {
             fontWeight: FontWeight.w300,
           ),
         ),
-        // No percentage shown - just gentle message
         if (showMessage)
           Padding(
             padding: const EdgeInsets.only(top: 4),
@@ -381,7 +374,6 @@ class GentleProgressWidget extends StatelessWidget {
   }
 }
 
-/// ✅ NEW: Resource indicator for garden
 class ResourceIndicator extends StatelessWidget {
   final int waterDrops;
   final int sunlightPoints;

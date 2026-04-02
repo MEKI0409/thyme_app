@@ -1,7 +1,4 @@
 // screens/welcome_back_screen.dart
-// Thyme App Welcome Back Page - Cute Style Version
-// Calm Gamification: No-guilt return screen
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/welcome_back_service.dart';

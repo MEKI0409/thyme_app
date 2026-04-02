@@ -1,10 +1,6 @@
 // services/welcome_back_service.dart
-// Calm Gamification: No-guilt return - users are always welcome back
-// The garden NEVER punishes absence. Plants rest, they don't die.
 
 class WelcomeBackService {
-  /// Generate warm welcome back message based on absence duration
-  /// NEVER use guilt-inducing language like "we missed you" or "you've been away"
   String getWelcomeBackMessage(int daysSinceLastVisit) {
     if (daysSinceLastVisit <= 1) {
       return "Welcome back. 🌿";
@@ -27,7 +23,6 @@ class WelcomeBackService {
     }
   }
 
-  /// Get garden status message (NOT punishment, just gentle acknowledgment)
   String getGardenStatusMessage(int daysSinceLastVisit) {
     if (daysSinceLastVisit <= 1) {
       return "Your garden is thriving. 🌸";
@@ -41,7 +36,6 @@ class WelcomeBackService {
     }
   }
 
-  /// Get a gentle activity suggestion (invitation, not requirement)
   String? getGentleSuggestion(int daysSinceLastVisit, String? lastMood) {
     // Only suggest if they've been away a while, and keep it optional
     if (daysSinceLastVisit < 3) return null;
@@ -62,8 +56,6 @@ class WelcomeBackService {
   /// Calculate rest bonus (REWARD for coming back, not punishment for leaving)
   /// This is a calm gamification approach - absence is rewarded, not punished
   Map<String, int> calculateRestBonus(int daysSinceLastVisit) {
-    // The idea: your garden "stored up" resources while resting
-    // This REWARDS returning, not punishes absence
     if (daysSinceLastVisit <= 1) {
       return {'water': 0, 'sunlight': 0};
     } else if (daysSinceLastVisit <= 7) {
@@ -71,12 +63,10 @@ class WelcomeBackService {
     } else if (daysSinceLastVisit <= 30) {
       return {'water': 5, 'sunlight': 5};
     } else {
-      // Cap the bonus so it doesn't feel exploitative
       return {'water': 10, 'sunlight': 10};
     }
   }
 
-  /// Get affirmation for returning
   String getReturnAffirmation() {
     final affirmations = [
       "Taking breaks is part of the journey. You're here now, and that matters.",
@@ -90,13 +80,11 @@ class WelcomeBackService {
     return affirmations[DateTime.now().day % affirmations.length];
   }
 
-  /// Check if user should see onboarding refresh (gentle reminder of features)
   bool shouldShowFeatureRefresh(int daysSinceLastVisit) {
     // If they've been away more than 30 days, gently remind them of features
     return daysSinceLastVisit > 30;
   }
 
-  /// Get feature refresh items (not new feature announcements, just gentle reminders)
   List<FeatureReminder> getFeatureReminders() {
     return [
       FeatureReminder(

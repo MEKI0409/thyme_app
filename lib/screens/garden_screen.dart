@@ -1,23 +1,17 @@
 // screens/garden_screen.dart
-// Updated version: Using macaron color palette flat cute icons
-// Using shared widget library
-// Added plant level up celebration animation
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' as math;
 import '../controllers/auth_controller.dart';
 import '../controllers/garden_controller.dart';
 import '../controllers/mood_controller.dart';
-import '../utils/theme.dart';
 import '../utils/constants.dart';
 import '../widgets/cute_garden_icons.dart';
-import '../widgets/cute_widgets.dart';
 import '../widgets/plant_level_up_animation.dart';
-import '../widgets/garden_ambiance_widget.dart'; // ✅ NEW: 情绪响应环境效果
-import '../services/garden_audio_service.dart'; // ✅ NEW: 环境音效服务
-import '../services/mood_responsive_garden_service.dart'; // ✅ FIX: 用于获取 ambiance
+import '../widgets/garden_ambiance_widget.dart';
+import '../services/garden_audio_service.dart';
+import '../services/mood_responsive_garden_service.dart';
 
 class GardenScreen extends StatefulWidget {
   const GardenScreen({Key? key}) : super(key: key);
@@ -34,10 +28,9 @@ class _GardenScreenState extends State<GardenScreen>
   late Animation<double> _breatheAnimation;
   late Animation<double> _floatAnimation;
 
-  // ✅ NEW: 环境音效服务
   final GardenAudioService _audioService = GardenAudioService();
-  final MoodResponsiveGardenService _gardenService = MoodResponsiveGardenService(); // ✅ FIX: 用于获取 ambiance
-  String? _lastMood; // 跟踪情绪变化，避免重复触发音效
+  final MoodResponsiveGardenService _gardenService = MoodResponsiveGardenService();
+  String? _lastMood;
 
   @override
   void initState() {
@@ -46,7 +39,6 @@ class _GardenScreenState extends State<GardenScreen>
   }
 
   void _initAnimations() {
-    // Breathing animation - plant slight scaling
     _breatheController = AnimationController(
       duration: const Duration(milliseconds: 3000),
       vsync: this,
@@ -56,7 +48,6 @@ class _GardenScreenState extends State<GardenScreen>
       CurvedAnimation(parent: _breatheController, curve: Curves.easeInOut),
     );
 
-    // Float animation - plant slight vertical movement
     _floatController = AnimationController(
       duration: const Duration(milliseconds: 4000),
       vsync: this,
@@ -66,7 +57,6 @@ class _GardenScreenState extends State<GardenScreen>
       CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
     );
 
-    // Sparkle animation
     _sparkleController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -78,7 +68,7 @@ class _GardenScreenState extends State<GardenScreen>
     _breatheController.dispose();
     _floatController.dispose();
     _sparkleController.dispose();
-    _audioService.stopWithFadeOut(); // ✅ NEW: 离开花园页面时停止音效
+    _audioService.stopWithFadeOut();
     super.dispose();
   }
 
@@ -90,15 +80,9 @@ class _GardenScreenState extends State<GardenScreen>
           return _buildLoadingState();
         }
 
-        // ✅ FIX: 同步 MoodController 的情绪到 GardenController
-        // 这是关键修复！之前 gardenController.currentMood 永远是 null，
-        // 因为没有任何地方调用 gardenController.setCurrentMood()。
-        // MoodController.currentMood 在用户写日记后会更新，
-        // 但 GardenController 不知道这个变化。
         final moodFromMoodController = moodController.currentMood;
         if (moodFromMoodController != null &&
             moodFromMoodController != gardenController.currentMood) {
-          // 用 postFrameCallback 避免在 build 中修改其他 provider 的状态
           WidgetsBinding.instance.addPostFrameCallback((_) {
             gardenController.setCurrentMood(moodFromMoodController);
           });
@@ -106,12 +90,9 @@ class _GardenScreenState extends State<GardenScreen>
 
         final garden = gardenController.gardenState;
         final ambiance = gardenController.currentAmbiance;
-        // ✅ FIX: 优先使用 MoodController 的情绪（更实时），
-        // 回退到 GardenController 的（可能还没同步）
         final currentMood = moodFromMoodController ?? gardenController.currentMood;
         final selectedColor = Constants.parseColor(garden.selectedColor);
 
-        // ✅ NEW: 情绪变化时切换环境音效
         if (currentMood != _lastMood) {
           _lastMood = currentMood;
           final soundToPlay = ambiance?.ambientSound ??
@@ -121,12 +102,9 @@ class _GardenScreenState extends State<GardenScreen>
           });
         }
 
-        // ✅ NEW: GardenAmbianceWidget 包裹整个花园，启用情绪响应视觉效果
-        // 根据情绪显示：蝴蝶(happy)、花瓣(stressed)、萤火虫(calm)、
-        // 雨滴(sad)、星光(happy)、暖光(sad/happy/calm)、呼吸引导(anxious)
         return GardenAmbianceWidget(
           currentMood: currentMood,
-          showMessage: false, // 我们用自己的 _buildAmbianceHeader 显示消息
+          showMessage: false,
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
@@ -252,7 +230,6 @@ class _GardenScreenState extends State<GardenScreen>
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Background decoration rings
             ...List.generate(3, (index) {
               return ListenableBuilder(
                 listenable: _sparkleController,
@@ -273,10 +250,8 @@ class _GardenScreenState extends State<GardenScreen>
               );
             }),
 
-            // Floating flower decorations
             ...List.generate(6, (index) => _buildFloatingFlower(index)),
 
-            // Main plant
             ListenableBuilder(
               listenable: Listenable.merge([_breatheAnimation, _floatAnimation]),
               builder: (context, child) {
@@ -293,7 +268,6 @@ class _GardenScreenState extends State<GardenScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Plant aura background
                     Container(
                       padding: const EdgeInsets.all(25),
                       decoration: BoxDecoration(
@@ -346,9 +320,6 @@ class _GardenScreenState extends State<GardenScreen>
                       ),
                     ),
                     const SizedBox(height: 10),
-                    // Description text
-                    // ✅ FIXED: FittedBox prevents horizontal overflow when
-                    // breathe animation scales the Column beyond container width
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
@@ -478,7 +449,6 @@ class _GardenScreenState extends State<GardenScreen>
             ],
           ),
           const SizedBox(height: 16),
-          // Show water and sunlight requirements
           if (garden.plantLevel < 10) ...[
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -569,7 +539,6 @@ class _GardenScreenState extends State<GardenScreen>
               ),
             ),
             const Spacer(),
-            // 右侧：数值（用 FittedBox 防止溢出）
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Row(
@@ -702,7 +671,7 @@ class _GardenScreenState extends State<GardenScreen>
             ? () async {
           final authController = Provider.of<AuthController>(context, listen: false);
           final user = authController.currentUser;
-          if (user == null) return; // ✅ FIXED (v3): null 安全检查
+          if (user == null) return;
           final oldLevel = garden.plantLevel;
           final success = await controller.growPlant(user.uid);
           if (success && mounted) {
@@ -914,7 +883,7 @@ class _GardenScreenState extends State<GardenScreen>
                   if (isUnlocked) {
                     final authController = Provider.of<AuthController>(context, listen: false);
                     final user = authController.currentUser;
-                    if (user == null) return; // ✅ FIXED (v3): null 安全检查
+                    if (user == null) return;
                     await controller.selectColor(user.uid, hex);
                   } else if (canUnlock) {
                     _showUnlockDialog(hex, name, cost, controller, color);
@@ -967,8 +936,6 @@ class _GardenScreenState extends State<GardenScreen>
                         ],
                       ),
                       const SizedBox(height: 6),
-                      // ✅ FIXED: FittedBox ensures long color names like
-                      // "Pink Bliss" scale down instead of overflowing by ~6px
                       FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
@@ -1012,10 +979,9 @@ class _GardenScreenState extends State<GardenScreen>
 
   void _showUnlockDialog(String hex, String name, int cost,
       GardenController controller, Color color) {
-    // ✅ FIXED (v3): 在 dialog 外捕获引用，防止 pop 后 context 失效
     final authController = Provider.of<AuthController>(context, listen: false);
     final user = authController.currentUser;
-    if (user == null) return; // ✅ FIXED (v3): null 安全检查
+    if (user == null) return;
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     showDialog(
@@ -1042,7 +1008,6 @@ class _GardenScreenState extends State<GardenScreen>
               ),
             ),
             const SizedBox(width: 14),
-            // ✅ FIXED: Wrap in Flexible to prevent right overflow
             Flexible(
               child: Text(
                 'Unlock $name?',
@@ -1108,7 +1073,6 @@ class _GardenScreenState extends State<GardenScreen>
                           ),
                         ),
                         const SizedBox(width: 12),
-                        // ✅ FIXED: Wrap in Expanded to prevent right overflow
                         Expanded(
                           child: Text(
                             '$name unlocked!',
@@ -1221,7 +1185,6 @@ class _GardenScreenState extends State<GardenScreen>
                   children: [
                     const CuteStar(size: 18),
                     const SizedBox(width: 8),
-                    // ✅ FIXED: Use Flexible to prevent long achievement names from overflowing
                     Flexible(
                       child: Text(
                         achievement,

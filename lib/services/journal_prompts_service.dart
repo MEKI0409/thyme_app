@@ -1,12 +1,8 @@
 // services/journal_prompts_service.dart
-// Calm Gamification: Reflective journal prompts
-// These are INVITATIONS, not tasks or requirements
-// ✅ FIXED: Added dart:math import and Random class for true randomness
 
 import 'dart:math';
 
 class JournalPromptsService {
-  // ✅ 添加静态 Random 实例，确保真正的随机性
   static final Random _random = Random();
 
   /// Get gentle journal prompts - never demanding, always inviting
@@ -30,7 +26,6 @@ class JournalPromptsService {
     ];
   }
 
-  /// ✅ FIXED: Get a truly random gentle prompt using Random class
   static String getRandomPrompt() {
     final prompts = getGentlePrompts();
     return prompts[_random.nextInt(prompts.length)];
@@ -85,7 +80,6 @@ class JournalPromptsService {
     }
   }
 
-  /// ✅ FIXED: Get completion response with true randomness
   static String getCompletionResponse() {
     final responses = [
       "Thank you for sharing. Your words matter. 💚",
@@ -120,7 +114,6 @@ class JournalPromptsService {
     return prompts[_random.nextInt(prompts.length)];
   }
 
-  /// Get follow-up prompts for deeper reflection (optional, never forced)
   static List<String> getFollowUpPrompts(String originalEntry) {
     return [
       "Is there more you'd like to explore about this?",
@@ -130,7 +123,7 @@ class JournalPromptsService {
     ];
   }
 
-  /// Check if prompt should be shown (respect user's space)
+  /// Check if prompt should be shown
   static bool shouldShowPrompt(DateTime? lastJournalEntry) {
     // Don't prompt if they just journaled
     if (lastJournalEntry != null) {
@@ -140,7 +133,7 @@ class JournalPromptsService {
     return true;
   }
 
-  /// Get a gentle nudge (not a reminder, not a push)
+  /// Get a gentle nudge
   static String? getGentleNudge(int daysSinceLastEntry) {
     if (daysSinceLastEntry <= 1) return null;
 
@@ -151,7 +144,6 @@ class JournalPromptsService {
       return "It's been a few days. "
           "Would you like to check in with yourself? 💭";
     } else {
-      // After a week, don't nudge - respect their space
       return null;
     }
   }

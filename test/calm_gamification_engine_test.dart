@@ -1,21 +1,4 @@
 // test/calm_gamification_engine_test.dart
-// ============================================================================
-// CALM GAMIFICATION ENGINE - COMPREHENSIVE UNIT TESTS
-// ============================================================================
-// ✅ IMPROVED: 使用 Constants.calculateHabitReward 替代 GardenService
-// ✅ IMPROVED: 更严格的边界值测试
-// ✅ IMPROVED: 添加回归测试保护
-// ============================================================================
-//
-// TEST METHODOLOGY:
-// This test suite validates the core algorithms that differentiate this app
-// from traditional gamified habit apps. The "Calm Gamification" approach:
-//   1. Non-punitive mechanics (gardens rest, never wither)
-//   2. Anti-streak-anxiety design (returning users receive bonuses)
-//   3. Mood-responsive rewards (emotional alignment unlocks special features)
-//   4. Guilt-free messaging (no "we missed you" or "you're falling behind")
-//
-// ============================================================================
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:thyme_app/models/garden_model.dart';
@@ -33,9 +16,8 @@ void main() {
       moodGardenService = MoodResponsiveGardenService();
     });
 
-    // ========================================================================
     // TEST GROUP 1: Reward Calculation Algorithm (Using Constants)
-    // ========================================================================
+
     group('Reward Calculation Algorithm', () {
       test('TC1.1: Base reward should be minimum for any habit', () {
         final rewards = Constants.calculateHabitReward(
@@ -172,9 +154,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 2: Special Unlock System
-    // ========================================================================
+
     group('Special Unlock System', () {
       test('TC2.1: anxious + Mindfulness should unlock Calm Blue', () {
         final unlock = Constants.checkSpecialUnlock('anxious', 'Mindfulness');
@@ -210,14 +191,12 @@ void main() {
       test('TC2.7: Case sensitivity check', () {
         // Function should be case-insensitive for better UX
         expect(Constants.checkSpecialUnlock('anxious', 'Mindfulness'), isNotNull);
-        expect(Constants.checkSpecialUnlock('ANXIOUS', 'Mindfulness'), isNotNull);  // 也应该匹配
-        expect(Constants.checkSpecialUnlock('Anxious', 'Mindfulness'), isNotNull);  // 也应该匹配
+        expect(Constants.checkSpecialUnlock('ANXIOUS', 'Mindfulness'), isNotNull);
+        expect(Constants.checkSpecialUnlock('Anxious', 'Mindfulness'), isNotNull);
       });
     });
 
-    // ========================================================================
     // TEST GROUP 3: Rest Bonus Algorithm (Anti-Streak-Anxiety)
-    // ========================================================================
     group('Rest Bonus Algorithm', () {
       test('TC3.1: 0-1 day absence should give no bonus', () {
         for (int days = 0; days <= 1; days++) {
@@ -258,9 +237,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 4: Garden State Management
-    // ========================================================================
+
     group('Garden State Management', () {
       test('TC4.1: Garden should NEVER wither (only rest)', () {
         // Create a garden that hasn't been visited in a very long time
@@ -275,25 +253,20 @@ void main() {
           achievements: [],
         );
 
-        // Garden should be resting, not withered
         expect(oldGarden.isResting, isTrue);
         expect(oldGarden.gardenStatus, isNot(equals('withered')));
 
-        // Plant level should be preserved
         expect(oldGarden.plantLevel, equals(5));
         expect(oldGarden.waterDrops, equals(50));
       });
 
       test('TC4.2: canGrow should check both resources and level', () {
-        // Has resources but at max level
         final maxLevel = _createTestGarden(level: 10, water: 1000, sunlight: 500);
         expect(maxLevel.canGrow(), isFalse);
 
-        // Has level capacity but no resources
         final noResources = _createTestGarden(level: 5, water: 0, sunlight: 0);
         expect(noResources.canGrow(), isFalse);
 
-        // Has both
         final canGrow = _createTestGarden(level: 5, water: 100, sunlight: 50);
         expect(canGrow.canGrow(), isTrue);
       });
@@ -337,9 +310,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 5: Mood-Responsive Garden Ambiance
-    // ========================================================================
+
     group('Mood-Responsive Garden Ambiance', () {
       test('TC5.1: Anxious mood should show breathing guide', () {
         final ambiance = moodGardenService.getGardenAmbiance('anxious');
@@ -385,9 +357,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 6: Welcome Back Messages (Guilt-Free)
-    // ========================================================================
+
     group('Welcome Back Messages (Guilt-Free)', () {
       test('TC6.1: Messages should NEVER contain guilt phrases', () {
         final guiltPhrases = [
@@ -436,9 +407,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 7: Growth Cost Consistency
-    // ========================================================================
+
     group('Growth Cost Consistency', () {
       test('TC7.1: Constants and GardenModel should have same costs', () {
         for (int level = 0; level < 10; level++) {
@@ -474,9 +444,8 @@ void main() {
       });
     });
 
-    // ========================================================================
     // TEST GROUP 8: Category Reward Bonuses
-    // ========================================================================
+
     group('Category Reward Bonuses', () {
       test('TC8.1: Calming categories should give water bonus', () {
         final calmingCategories = ['Mindfulness', 'Self-Care'];
@@ -487,7 +456,7 @@ void main() {
             currentStreak: 0,
           );
           final baseRewards = Constants.calculateHabitReward(
-            category: 'Social', // Neutral
+            category: 'Social',
             currentStreak: 0,
           );
 
@@ -532,9 +501,7 @@ void main() {
   });
 }
 
-// ============================================================================
 // HELPER FUNCTIONS
-// ============================================================================
 
 GardenState _createTestGarden({
   int level = 0,

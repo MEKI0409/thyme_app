@@ -1,6 +1,4 @@
 // screens/mood_journal_screen.dart
-// Thyme App Mood Journal Page - Cute Style Version 🌸
-// Using shared widget library
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +13,7 @@ import '../widgets/cute_garden_icons.dart';
 import '../widgets/cute_widgets.dart';
 import '../utils/theme.dart';
 import '../utils/date_utils.dart';
-import '../utils/constants.dart'; // ✅ ADDED: for unified getMoodColor
+import '../utils/constants.dart';
 
 class MoodJournalScreen extends StatefulWidget {
   const MoodJournalScreen({Key? key}) : super(key: key);
@@ -261,9 +259,7 @@ class _MoodJournalScreenState extends State<MoodJournalScreen>
     );
   }
 
-  // ✅ FIXED: _getMoodEmoji removed (dead code, UI uses CuteMoodEmoji widget)
 
-  // ✅ FIXED: Delegate to Constants for single source of truth
   Color _getMoodColor(String mood) {
     return Constants.getMoodColor(mood);
   }
@@ -290,7 +286,7 @@ class _MoodJournalScreenState extends State<MoodJournalScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Journal input area
+
               ListenableBuilder(
                 listenable: _breathingAnimation,
                 builder: (context, _) {
@@ -321,7 +317,6 @@ class _MoodJournalScreenState extends State<MoodJournalScreen>
 
               const SizedBox(height: 28),
 
-              // History title
               Row(
                 children: [
                   Container(
@@ -350,7 +345,6 @@ class _MoodJournalScreenState extends State<MoodJournalScreen>
               ),
               const SizedBox(height: 16),
 
-              // History list
               if (entries.isEmpty)
                 _buildEmptyEntriesState()
               else
@@ -592,7 +586,6 @@ class _MoodJournalScreenState extends State<MoodJournalScreen>
   }
 
   Widget _buildEmptyEntriesState() {
-    // Using CuteEmptyState widget
     return CuteEmptyState(
       emoji: '📝',
       title: 'Your journal awaits',
@@ -686,7 +679,6 @@ class _MoodJournalScreenState extends State<MoodJournalScreen>
     );
   }
 
-  // Using ThymeDateUtils
   String _formatTimestamp(DateTime time) {
     return ThymeDateUtils.formatRelative(time);
   }

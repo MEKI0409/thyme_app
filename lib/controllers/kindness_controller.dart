@@ -1,6 +1,4 @@
 // controllers/kindness_controller.dart
-// 善意链控制器 - 与花园系统连接版本 🌸
-// ✅ 保持向后兼容性
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,10 +8,6 @@ import '../models/kindness_chain_model.dart';
 class KindnessController extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// ✅ NEW: 奖励回调，由外部（如 Page 层）注入，确保奖励写入花园
-  /// 用法: kindnessController.onRewardEarned = (sunlight, water) async {
-  ///   await gardenController.addKindnessReward(sunlight: sunlight, water: water);
-  /// };
   Future<void> Function(int sunlight, int water)? onRewardEarned;
 
   List<KindnessAct> _myKindnessActs = [];
@@ -23,17 +17,14 @@ class KindnessController extends ChangeNotifier {
   StreamSubscription? _myActsSubscription;
   StreamSubscription? _communitySubscription;
 
-  // 统计
   int _totalKindnessCount = 0;
   int _weeklyKindnessCount = 0;
   int _currentStreak = 0;
 
-  // ✅ 新增：最近一次添加的奖励信息
   Map<String, dynamic>? _lastRewardInfo;
 
-  // ✅ NEW: Streak milestone tracking
   int _previousStreak = 0;
-  int? _newMilestone; // Set when a milestone is hit (3, 7, 14, 30)
+  int? _newMilestone;
   static const List<int> _milestones = [3, 7, 14, 30];
 
   List<KindnessAct> get myKindnessActs => _myKindnessActs;
@@ -45,7 +36,6 @@ class KindnessController extends ChangeNotifier {
   int get currentStreak => _currentStreak;
   Map<String, dynamic>? get lastRewardInfo => _lastRewardInfo;
 
-  /// ✅ NEW: Check if a milestone was just reached (read once, then clears)
   int? consumeMilestone() {
     final m = _newMilestone;
     _newMilestone = null;
@@ -80,11 +70,6 @@ class KindnessController extends ChangeNotifier {
       },
     );
 
-    // 加载社区善意行为（公开的）
-    // ⚠️ 此查询需要 Firestore 复合索引：
-    //    Collection: kindness
-    //    Fields: isPublic (Ascending) + createdAt (Descending)
-    //    如果出现 failed-precondition 错误，请在 Firebase Console 创建该索引
     _communitySubscription?.cancel();
     _communitySubscription = _firestore
         .collection('kindness')
@@ -100,14 +85,12 @@ class KindnessController extends ChangeNotifier {
         notifyListeners();
       },
       onError: (error) {
-        // ✅ FIXED: 索引未创建时优雅降级，不影响其他功能
         final errorStr = error.toString();
         if (errorStr.contains('failed-precondition') || errorStr.contains('requires an index')) {
           debugPrint('⚠️ Community kindness query requires a Firestore composite index.');
           debugPrint('   Please create it in Firebase Console:');
           debugPrint('   Collection: kindness | Fields: isPublic (Asc) + createdAt (Desc)');
           debugPrint('   Or click the link in the error message above.');
-          // 使用空列表降级，不阻塞 UI
           _communityKindnessActs = [];
           notifyListeners();
         } else {
@@ -119,21 +102,16 @@ class KindnessController extends ChangeNotifier {
 
   void _calculateStats() {
     _totalKindnessCount = _myKindnessActs.length;
-
-    // 计算本周善意数量
     final now = DateTime.now();
     final weekStart = now.subtract(Duration(days: now.weekday - 1));
     _weeklyKindnessCount = _myKindnessActs
         .where((act) => act.createdAt.isAfter(weekStart))
         .length;
 
-    // ✅ NEW: Save previous streak for milestone detection
     _previousStreak = _currentStreak;
 
-    // 计算连续天数
     _currentStreak = _calculateStreak();
 
-    // ✅ NEW: Check if a milestone was just reached
     for (final milestone in _milestones) {
       if (_currentStreak >= milestone && _previousStreak < milestone) {
         _newMilestone = milestone;
@@ -158,7 +136,6 @@ class KindnessController extends ChangeNotifier {
         DateTime.now().year, DateTime.now().month, DateTime.now().day);
     final yesterday = today.subtract(const Duration(days: 1));
 
-    // 检查今天或昨天是否有记录
     if (!sortedDates.contains(today) && !sortedDates.contains(yesterday)) {
       return 0;
     }
@@ -176,7 +153,6 @@ class KindnessController extends ChangeNotifier {
     return streak;
   }
 
-  /// ✅ 保持原有签名：返回 bool
   Future<bool> addKindnessAct({
     required String userId,
     required String description,
@@ -184,10 +160,6 @@ class KindnessController extends ChangeNotifier {
     bool isPublic = false,
   }) async {
     try {
-      // ✅ FIXED: Don't set _isLoading = true here.
-      // The stream listener already manages loading state.
-      // Setting it here caused the UI to briefly show the loading spinner
-      // and then snap to empty state before the stream pushed the new data.
 
       final now = DateTime.now();
       final actData = {
@@ -199,8 +171,6 @@ class KindnessController extends ChangeNotifier {
         'rippleCount': 0,
       };
 
-      // ✅ FIXED: Optimistic local insert — add to the list immediately
-      // so the UI updates before waiting for the Firestore stream round-trip.
       final optimisticAct = KindnessAct(
         id: 'temp_${now.millisecondsSinceEpoch}',
         userId: userId,
@@ -215,11 +185,8 @@ class KindnessController extends ChangeNotifier {
       notifyListeners();
 
       await _firestore.collection('kindness').add(actData);
-
-      // ✅ 计算并保存奖励信息（供 UI 读取）
       _lastRewardInfo = _calculateKindnessRewards(category, isPublic);
 
-      // ✅ NEW: 自动通知花园系统发放奖励（如果回调已注入）
       if (onRewardEarned != null) {
         try {
           await onRewardEarned!(
@@ -231,11 +198,9 @@ class KindnessController extends ChangeNotifier {
         }
       }
 
-      // Don't set _isLoading = false here — the stream listener will
-      // push the real data and handle the state transition naturally.
       return true;
+
     } catch (e) {
-      // ✅ On error, remove the optimistic insert
       _myKindnessActs.removeWhere((act) => act.id.startsWith('temp_'));
       _calculateStats();
       _errorMessage = 'Failed to add kindness act: $e';
@@ -245,15 +210,12 @@ class KindnessController extends ChangeNotifier {
     }
   }
 
-  /// ✅ 新增：根据善意类别计算花园奖励
   Map<String, dynamic> _calculateKindnessRewards(String category, bool isPublic) {
-    // 基础奖励
     int sunlight = 2;
     int water = 1;
     String message = '';
     String bonusType = 'normal';
 
-    // 根据类别给予不同奖励
     switch (category) {
       case 'self':
         water += 1;
@@ -290,12 +252,10 @@ class KindnessController extends ChangeNotifier {
         message = 'Every kindness matters~ ✨';
     }
 
-    // 公开分享额外奖励
     if (isPublic) {
       sunlight += 1;
     }
 
-    // 连续记录奖励
     if (_currentStreak >= 7) {
       sunlight += 1;
       water += 1;
@@ -310,7 +270,6 @@ class KindnessController extends ChangeNotifier {
     };
   }
 
-  /// ✅ 新增：获取奖励值（供 garden_controller 调用）
   Map<String, int> getLastRewardValues() {
     if (_lastRewardInfo == null) {
       return {'sunlight': 2, 'water': 1};
@@ -321,10 +280,8 @@ class KindnessController extends ChangeNotifier {
     };
   }
 
-  /// ✅ FIXED: Added userId check to prevent self-rippling
   Future<bool> rippleKindness(String kindnessId, {String? currentUserId}) async {
     try {
-      // ✅ FIX: Prevent self-ripple
       if (currentUserId != null) {
         final doc = await _firestore.collection('kindness').doc(kindnessId).get();
         if (doc.exists && doc.data()?['userId'] == currentUserId) {
@@ -354,7 +311,6 @@ class KindnessController extends ChangeNotifier {
     }
   }
 
-  /// ✅ 改进：更温柔可爱的每日提示
   String getDailyPrompt() {
     final prompts = [
       'What tiny kindness could brighten someone\'s day? 🌸',
@@ -372,7 +328,6 @@ class KindnessController extends ChangeNotifier {
     return prompts[index];
   }
 
-  /// ✅ NEW: Mood-aware daily prompt — gentler message when user is struggling
   String getMoodAwarePrompt(String? currentMood) {
     switch (currentMood?.toLowerCase()) {
       case 'sad':
@@ -394,8 +349,6 @@ class KindnessController extends ChangeNotifier {
     }
   }
 
-  /// ✅ NEW: Quick-add kindness suggestions per category
-  /// These lower friction — users can tap instead of typing from scratch
   static List<String> getQuickSuggestions(String category) {
     switch (category) {
       case 'self':
@@ -449,7 +402,6 @@ class KindnessController extends ChangeNotifier {
     }
   }
 
-  /// ✅ NEW: Get milestone celebration message
   static String getMilestoneMessage(int milestone) {
     switch (milestone) {
       case 3:
@@ -465,7 +417,6 @@ class KindnessController extends ChangeNotifier {
     }
   }
 
-  /// ✅ 新增：获取鼓励消息
   String getEncouragementMessage() {
     if (_currentStreak >= 7) {
       return 'A whole week of kindness! Your garden glows~ 🌟';

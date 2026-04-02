@@ -1,18 +1,7 @@
 // test/settings_test.dart
-// Thyme App - Settings 模块单元测试 🧪
-// 覆盖: ReminderTime, NotificationSettings, AppSettings, SettingsController
-//
-// 运行: flutter test test/settings_test.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// 内联模型副本（避免 import 路径问题，便于独立运行）
-// 如果项目路径已配好，可直接替换为:
-//   import 'package:thyme/models/settings_model.dart';
-//   import 'package:thyme/controllers/settings_controller.dart';
-// ═══════════════════════════════════════════════════════════════════════════════
 
 // --- ReminderTime ---
 class ReminderTime {
@@ -126,7 +115,6 @@ class NotificationSettings {
     );
   }
 
-  // ⚠️ BUG 复现：源码中 == 只比较了 bool 字段，没有比较 Time 字段
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -181,14 +169,9 @@ class AppSettings {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 测试用例
-// ═══════════════════════════════════════════════════════════════════════════════
-
 void main() {
-  // ─────────────────────────────────────────────────────────────────────────
   // ReminderTime Tests
-  // ─────────────────────────────────────────────────────────────────────────
+
   group('ReminderTime', () {
     test('default values should be 9:00', () {
       const rt = ReminderTime();
@@ -217,7 +200,6 @@ void main() {
       final newRt = rt.withTimeOfDay(const TimeOfDay(hour: 18, minute: 45));
       expect(newRt.hour, 18);
       expect(newRt.minute, 45);
-      // 原始对象不受影响
       expect(rt.hour, 9);
       expect(rt.minute, 0);
     });
@@ -243,7 +225,6 @@ void main() {
       expect(a.hashCode, equals(b.hashCode));
     });
 
-    // ── fromMap 测试 ──
 
     test('fromMap should parse valid data', () {
       final rt = ReminderTime.fromMap({'hour': 15, 'minute': 45});
@@ -275,7 +256,6 @@ void main() {
       expect(rt.minute, 0);
     });
 
-    // ── toMap 往返测试 ──
 
     test('toMap -> fromMap roundtrip should preserve values', () {
       const original = ReminderTime(hour: 17, minute: 42);
@@ -284,7 +264,6 @@ void main() {
       expect(restored, equals(original));
     });
 
-    // ── 边界值测试 ──
 
     test('formatted edge case: midnight (0:00)', () {
       expect(const ReminderTime(hour: 0, minute: 0).formatted, '12:00 AM');
@@ -299,9 +278,8 @@ void main() {
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
   // NotificationSettings Tests
-  // ─────────────────────────────────────────────────────────────────────────
+
   group('NotificationSettings', () {
     test('default values should match design spec', () {
       const ns = NotificationSettings();
@@ -338,7 +316,7 @@ void main() {
       expect(copy.kindnessReminderTime, ns.kindnessReminderTime);
     });
 
-    // ── fromMap 测试 ──
+    // ── fromMap test ──
 
     test('fromMap should parse full valid map', () {
       final ns = NotificationSettings.fromMap({
@@ -371,11 +349,10 @@ void main() {
     test('fromMap should handle partial map (missing some keys)', () {
       final ns = NotificationSettings.fromMap({
         'habitRemindersEnabled': false,
-        // other keys missing
       });
       expect(ns.habitRemindersEnabled, false);
-      expect(ns.journalReminderEnabled, false); // default
-      expect(ns.streakAlertEnabled, true); // default
+      expect(ns.journalReminderEnabled, false);
+      expect(ns.streakAlertEnabled, true);
     });
 
     test('fromMap should handle null time maps gracefully', () {
@@ -385,8 +362,6 @@ void main() {
       });
       expect(ns.habitReminderTime, const ReminderTime(hour: 9, minute: 0));
     });
-
-    // ── toMap 往返测试 ──
 
     test('toMap -> fromMap roundtrip should preserve all values', () {
       const original = NotificationSettings(
@@ -401,7 +376,6 @@ void main() {
       final map = original.toMap();
       final restored = NotificationSettings.fromMap(map);
 
-      // 所有字段都应一致
       expect(restored.habitRemindersEnabled, original.habitRemindersEnabled);
       expect(restored.habitReminderTime, original.habitReminderTime);
       expect(restored.journalReminderEnabled, original.journalReminderEnabled);
@@ -411,11 +385,8 @@ void main() {
       expect(restored.streakAlertEnabled, original.streakAlertEnabled);
     });
 
-    // ── ⚠️ BUG: == 缺少 Time 字段比较 ──
 
     test('⚠️ BUG: equality ignores ReminderTime fields (should fail after fix)', () {
-      // 当前源码的 == 只比较 bool 字段，不比较 Time
-      // 两个 time 不同的实例在当前实现中被认为 "相等"
       const a = NotificationSettings(
         habitReminderTime: ReminderTime(hour: 9, minute: 0),
       );
@@ -423,10 +394,6 @@ void main() {
         habitReminderTime: ReminderTime(hour: 18, minute: 30),
       );
 
-      // 当前实现: a == b 为 true（因为 bool 字段完全一致）
-      // 修复后应该: a != b
-      //
-      // 👇 这个 expect 验证的是当前 BUG 行为，修复后需要翻转
       expect(a == b, isTrue,
           reason: 'BUG: == 不比较 Time 字段。修复 == 后将此改为 isFalse');
     });
@@ -442,8 +409,6 @@ void main() {
       expect(a.hashCode, equals(b.hashCode),
           reason: 'BUG: hashCode 不包含 Time 字段。修复后应不等');
     });
-
-    // ── 典型工作流模拟 ──
 
     test('toggle habit reminders off and back on', () {
       const original = NotificationSettings();
@@ -480,9 +445,8 @@ void main() {
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
   // AppSettings Tests
-  // ─────────────────────────────────────────────────────────────────────────
+
   group('AppSettings', () {
     test('default values', () {
       const settings = AppSettings();
@@ -546,7 +510,7 @@ void main() {
       const original = AppSettings(locale: 'en');
       final updated = original.copyWith(locale: 'zh');
       expect(updated.locale, 'zh');
-      expect(updated.notifications.habitRemindersEnabled, true); // unchanged default
+      expect(updated.notifications.habitRemindersEnabled, true);
     });
 
     test('copyWith notifications only', () {
@@ -554,11 +518,10 @@ void main() {
       final updated = original.copyWith(
         notifications: const NotificationSettings(streakAlertEnabled: false),
       );
-      expect(updated.locale, 'en'); // unchanged
-      expect(updated.notifications.streakAlertEnabled, false); // changed
+      expect(updated.locale, 'en');
+      expect(updated.notifications.streakAlertEnabled, false);
     });
 
-    // ── ⚠️ BUG: copyWith 无法将 locale 设为 null ──
 
     test('⚠️ BUG: copyWith cannot clear locale to null', () {
       const settings = AppSettings(locale: 'en');
@@ -570,10 +533,9 @@ void main() {
               '修复方案: 使用 Optional<String> 或加 clearLocale 参数');
     });
 
-    // ── Firestore 数据格式兼容性 ──
+    // ── Firestore 數據格式兼容性 ──
 
     test('fromMap should handle legacy data with extra fields', () {
-      // 模拟旧版 Firestore 文档可能有额外字段
       final settings = AppSettings.fromMap({
         'notifications': {
           'habitRemindersEnabled': true,
@@ -583,7 +545,6 @@ void main() {
           'kindnessReminderEnabled': false,
           'kindnessReminderTime': {'hour': 12, 'minute': 0},
           'streakAlertEnabled': true,
-          // 旧版可能有的额外字段
           'weeklyDigestEnabled': true,
           'soundEnabled': false,
         },
@@ -620,18 +581,15 @@ void main() {
         ),
       );
 
-      // 验证所有通知已开启
       expect(customized.notifications.habitRemindersEnabled, true);
       expect(customized.notifications.journalReminderEnabled, true);
       expect(customized.notifications.kindnessReminderEnabled, true);
       expect(customized.notifications.streakAlertEnabled, true);
 
-      // 验证自定义时间
       expect(customized.notifications.habitReminderTime.hour, 7);
       expect(customized.notifications.journalReminderTime.hour, 21);
       expect(customized.notifications.journalReminderTime.minute, 30);
 
-      // 序列化后还原
       final map = customized.toMap();
       final restored = AppSettings.fromMap(map);
       expect(restored.notifications.habitRemindersEnabled, true);
@@ -658,24 +616,20 @@ void main() {
       expect(restored.notifications.kindnessReminderEnabled, false);
       expect(restored.notifications.streakAlertEnabled, false);
 
-      // 时间仍然保留（以防用户重新开启）
       expect(restored.notifications.habitReminderTime.hour, 9);
       expect(restored.notifications.journalReminderTime.hour, 20);
     });
 
     test('scenario: settings page → pick time → auto-enable toggle', () {
-      // 模拟 SettingsController.setHabitReminderTime 的逻辑:
-      // 用户选择了时间 → 自动开启开关
       const settings = AppSettings(
         notifications: NotificationSettings(habitRemindersEnabled: false),
       );
 
-      // 模拟 controller 行为
       final updated = settings.copyWith(
         notifications: settings.notifications.copyWith(
           habitReminderTime: settings.notifications.habitReminderTime
               .withTimeOfDay(const TimeOfDay(hour: 7, minute: 30)),
-          habitRemindersEnabled: true, // 选完时间自动开启
+          habitRemindersEnabled: true,
         ),
       );
 
@@ -685,58 +639,39 @@ void main() {
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // SettingsController 逻辑测试 (不依赖 Firebase，纯逻辑验证)
-  // ─────────────────────────────────────────────────────────────────────────
+  // SettingsController test
   group('SettingsController Logic (offline)', () {
     test('⚠️ BUG: loadSettings dedup allows re-entry during loading', () {
-      // 源码: if (_userId == userId && !_isLoading) return;
-      // 当 _isLoading == true 且 _userId == userId 时，条件不满足 → 不 skip → 会重复加载
-      //
-      // 正确逻辑应该是:
-      //   if (_userId == userId) return;  // 同一用户直接跳过
-      // 或:
-      //   if (_userId == userId && _isLoading) return;  // 正在加载同一用户也跳过
-      //
-      // 此测试仅记录 bug，无法在不 mock Firebase 的情况下验证行为
       expect(true, isTrue, reason: 'See bug description above');
     });
 
     test('notification toggle workflow preserves time on toggle off/on', () {
-      // 模拟 controller 的 setHabitRemindersEnabled 序列
       var settings = const AppSettings();
 
-      // 用户自定义了时间
       settings = settings.copyWith(
         notifications: settings.notifications.copyWith(
           habitReminderTime: const ReminderTime(hour: 7, minute: 15),
         ),
       );
 
-      // 用户关闭开关
       settings = settings.copyWith(
         notifications: settings.notifications.copyWith(
           habitRemindersEnabled: false,
         ),
       );
       expect(settings.notifications.habitRemindersEnabled, false);
-      expect(settings.notifications.habitReminderTime.hour, 7); // 时间保留 ✅
+      expect(settings.notifications.habitReminderTime.hour, 7);
 
-      // 用户重新开启
       settings = settings.copyWith(
         notifications: settings.notifications.copyWith(
           habitRemindersEnabled: true,
         ),
       );
       expect(settings.notifications.habitRemindersEnabled, true);
-      expect(settings.notifications.habitReminderTime.hour, 7); // 时间仍然保留 ✅
+      expect(settings.notifications.habitReminderTime.hour, 7);
     });
 
     test('debounced save should coalesce rapid toggles', () {
-      // 模拟快速切换场景：用户连续点击 3 次
-      // 防抖 800ms 内只应触发一次保存
-      //
-      // 这里只验证 copyWith 的最终状态正确
       var settings = const AppSettings();
 
       settings = settings.copyWith(
@@ -749,16 +684,12 @@ void main() {
         notifications: settings.notifications.copyWith(streakAlertEnabled: false),
       );
 
-      // 最终状态应为 false
       expect(settings.notifications.streakAlertEnabled, false);
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Welcome Back System (Anti-Streak-Anxiety) 测试
-  // ─────────────────────────────────────────────────────────────────────────
+  // Welcome Back System (Anti-Streak-Anxiety) test
   group('WelcomeBackService Logic', () {
-    // 内联 service 以便独立测试
     Map<String, int> calculateRestBonus(int daysSinceLastVisit) {
       if (daysSinceLastVisit <= 1) {
         return {'water': 0, 'sunlight': 0};
@@ -815,9 +746,7 @@ void main() {
     });
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // 数据完整性 & 边界测试
-  // ─────────────────────────────────────────────────────────────────────────
+  // 數據+邊界測試
   group('Data Integrity', () {
     test('toMap output should contain all expected keys (NotificationSettings)', () {
       final map = const NotificationSettings().toMap();
@@ -859,14 +788,12 @@ void main() {
         ),
       );
 
-      // 只改 journalReminderTime
       final updated = original.copyWith(
         notifications: original.notifications.copyWith(
           journalReminderTime: const ReminderTime(hour: 23, minute: 0),
         ),
       );
 
-      // 验证只有 journalReminderTime 改了
       expect(updated.locale, 'ja');
       expect(updated.notifications.habitRemindersEnabled, false);
       expect(updated.notifications.habitReminderTime.hour, 6);

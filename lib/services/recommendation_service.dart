@@ -1,5 +1,4 @@
 // services/recommendation_service.dart
-// ✅ IMPROVED: Calm Gamification language - no pressure, no motivation
 
 import '../models/habit_model.dart';
 import '../utils/constants.dart';
@@ -50,7 +49,7 @@ class RecommendationService {
     return messages[mood] ?? 'Here are some gentle options for today:';
   }
 
-  /// ✅ IMPROVED: Reflective quotes instead of motivational
+  /// Reflective quotes instead of motivational
   String getReflectiveQuote(String mood) {
     final quotes = {
       'anxious':
@@ -80,7 +79,7 @@ class RecommendationService {
     return quotes[mood] ?? '"This moment is enough." - A gentle reminder';
   }
 
-  /// ✅ NEW: Get gentle encouragement (not motivation)
+  /// Get gentle encouragement (not motivation)
   String getGentleEncouragement(String mood) {
     final encouragements = {
       'anxious': 'Your garden is a safe space. Take all the time you need.',
@@ -99,7 +98,7 @@ class RecommendationService {
     return encouragements[mood] ?? 'You\'re doing just fine. 💚';
   }
 
-  /// ✅ NEW: Get activity suggestions based on energy level (not mood)
+  /// Get activity suggestions based on energy level (not mood)
   List<String> getEnergyBasedSuggestions(String energyLevel) {
     switch (energyLevel.toLowerCase()) {
       case 'low':
@@ -131,7 +130,7 @@ class RecommendationService {
     }
   }
 
-  /// ✅ NEW: Check if recommendation should be shown
+  /// Check if recommendation should be shown
   /// (Respects user's space - doesn't always push recommendations)
   bool shouldShowRecommendation(
       String? currentMood,
@@ -155,7 +154,7 @@ class RecommendationService {
     return true;
   }
 
-  /// ✅ NEW: Get time-appropriate suggestions
+  /// Get time-appropriate suggestions
   String getTimeBasedMessage() {
     final hour = DateTime.now().hour;
 

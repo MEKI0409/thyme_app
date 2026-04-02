@@ -1,11 +1,4 @@
 // test/unit_tests.dart
-// ============================================================================
-// THYME APP - COMPREHENSIVE UNIT TESTS
-// ============================================================================
-// ✅ IMPROVED: 移除所有 placeholder 测试，添加真实的测试逻辑
-// ✅ IMPROVED: 使用统一的 Constants 进行验证
-// ✅ IMPROVED: 添加更多边界条件测试
-// ============================================================================
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:thyme_app/models/garden_model.dart';
@@ -13,15 +6,13 @@ import 'package:thyme_app/models/habit_model.dart';
 import 'package:thyme_app/utils/constants.dart';
 
 void main() {
-  // ═══════════════════════════════════════════════════════════════════════════
-  // CONSTANTS TESTS - 验证常量配置
-  // ═══════════════════════════════════════════════════════════════════════════
+  // CONSTANTS TESTS
   group('Constants Tests', () {
     group('Plant Level Configuration', () {
       test('maxPlantLevel should be 10', () {
         expect(Constants.maxPlantLevel, equals(10));
         expect(GardenState.maxPlantLevel, equals(10));
-        // 两者应该保持一致
+        // should be the same
         expect(Constants.maxPlantLevel, equals(GardenState.maxPlantLevel));
       });
 
@@ -255,9 +246,7 @@ void main() {
     });
   });
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // GARDEN MODEL TESTS
-  // ═══════════════════════════════════════════════════════════════════════════
   group('GardenState Tests', () {
     group('Factory Constructors', () {
       test('initial should create valid starting state', () {
@@ -509,9 +498,7 @@ void main() {
     });
   });
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // HABIT MODEL TESTS
-  // ═══════════════════════════════════════════════════════════════════════════
   group('Habit Model Tests', () {
     group('Completion Status', () {
       test('isCompletedToday returns false when no completions', () {
@@ -626,7 +613,6 @@ void main() {
           completedDates: [lastWeek, yesterday, today],
         );
 
-        // Should count at least today and yesterday (depends on day of week)
         expect(habit.weeklyCompletionCount, greaterThanOrEqualTo(1));
       });
 
@@ -705,9 +691,7 @@ void main() {
   });
 }
 
-// ============================================================================
 // HELPER FUNCTIONS
-// ============================================================================
 
 GardenState _createTestGarden({
   int level = 0,

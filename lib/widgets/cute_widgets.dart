@@ -1,5 +1,5 @@
 // widgets/cute_widgets.dart
-// 🌸 Thyme App 公共组件库
+// 🌸 Thyme App 公共組件库
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -229,9 +229,7 @@ class CuteLoadingIndicator extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 📭 CuteEmptyState - 统一空状态提示
-// ═══════════════════════════════════════════════════════════════════════════════
+// 空狀態提示
 
 class CuteEmptyState extends StatelessWidget {
   final Widget? icon;
@@ -314,9 +312,7 @@ class CuteEmptyState extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 💧☀️ CuteResourceDisplay - 资源显示组件
-// ═══════════════════════════════════════════════════════════════════════════════
+// 資源顯示組件
 
 class CuteResourceDisplay extends StatelessWidget {
   final int waterDrops;
@@ -403,7 +399,6 @@ class CuteResourceDisplay extends StatelessWidget {
   }
 }
 
-/// 资源奖励显示（带+号）
 class CuteRewardDisplay extends StatelessWidget {
   final int waterReward;
   final int sunlightReward;
@@ -435,9 +430,8 @@ class CuteRewardDisplay extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 🎉 CuteRewardPopup - 奖励弹窗
-// ═══════════════════════════════════════════════════════════════════════════════
+// 獎勵彈窗
+
 
 class CuteRewardPopup {
   static void show(
@@ -639,9 +633,8 @@ class _RewardPopupContentState extends State<_RewardPopupContent> {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 🔘 CuteButton - 按鈕組件
-// ═══════════════════════════════════════════════════════════════════════════════
+// 按鈕組件
+
 
 class CuteButton extends StatelessWidget {
   final String text;
@@ -726,11 +719,8 @@ class CuteButton extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 📝 CuteInputField - 輸入框
-// ═══════════════════════════════════════════════════════════════════════════════
 
-/// 可爱风格输入框
+// 輸入框
 class CuteInputField extends StatelessWidget {
   final TextEditingController? controller;
   final String? label;
@@ -801,10 +791,7 @@ class CuteInputField extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 🏷️ CuteChip - 標簽組件
-// ═══════════════════════════════════════════════════════════════════════════════
-
+//標簽組件
 class CuteChip extends StatelessWidget {
   final String text;
   final Widget? icon;
@@ -854,10 +841,7 @@ class CuteChip extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 💬 CuteSnackBar - 提示條
-// ═══════════════════════════════════════════════════════════════════════════════
-
+//提示條
 class CuteSnackBar {
   static void show(
       BuildContext context, {
@@ -902,10 +886,7 @@ class CuteSnackBar {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 🔲 CuteDivider - 分割線
-// ═══════════════════════════════════════════════════════════════════════════════
-
+//分割線
 class CuteDivider extends StatelessWidget {
   final double? height;
   final EdgeInsetsGeometry? margin;
@@ -933,10 +914,7 @@ class CuteDivider extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 📊 CuteProgressBar - 進度條
-// ═══════════════════════════════════════════════════════════════════════════════
-
+//進度條
 
 class CuteProgressBar extends StatelessWidget {
   final double progress;
@@ -979,10 +957,8 @@ class CuteProgressBar extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 🎭 CuteAvatar - 頭像組件
-// ═══════════════════════════════════════════════════════════════════════════════
 
+// 頭像組件
 class CuteAvatar extends StatelessWidget {
   final String? name;
   final String? emoji;
@@ -1025,11 +1001,8 @@ class CuteAvatar extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 🌟 CuteSectionHeader - 区块标题
-// ═══════════════════════════════════════════════════════════════════════════════
 
-/// 区块标题组件
+// 區塊標題
 class CuteSectionHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
