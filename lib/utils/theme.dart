@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Primary Colors - Soft Green Series
+  // Primary Colors -
   static const Color primaryColor = Color(0xFF7AC996);
   static const Color primaryGreen = Color(0xFF7AC996);
   static const Color primaryLight = Color(0xFFB0DDB8);

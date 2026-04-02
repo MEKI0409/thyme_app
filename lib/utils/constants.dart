@@ -2,16 +2,27 @@
 import 'package:flutter/material.dart';
 
 class Constants {
-  // Pass it at build time:  flutter run --dart-define=GEMINI_API_KEY=your_key
-  // Get your free API Key at: https://aistudio.google.com/apikey
+  // ─────────────────────────────────────────────
+  // 🔑 API Keys  (pass at build time)
+  //
+  //   flutter run \
+  //     --dart-define=GEMINI_API_KEY=your_key \
+  //     --dart-define=COHERE_API_KEY=your_key
+  //
+  // Get your free keys at:
+  //   Gemini  → https://aistudio.google.com/apikey
+  //   Cohere  → https://dashboard.cohere.com/api-keys
+  // ─────────────────────────────────────────────
+
+  // — Gemini —
   static const String geminiApiKey = String.fromEnvironment('GEMINI_API_KEY');
-
   static const String geminiModel = 'gemini-2.5-flash-lite';
-  static const String geminiModelFallback = 'gemini-2.0-flash';
+  static const String geminiModelFallback = 'gemini-2.5-flash';
 
-  static const String sentimentApiUrl = '';
-
-  // API Status Check
+  // — Cohere —
+  static const String cohereApiKey = String.fromEnvironment('COHERE_API_KEY');
+  static const String cohereModel = 'command-r7b-12-2024';
+  static const String cohereEndpoint = 'https://api.cohere.com/v2/chat';
 
   static bool get isGeminiConfigured {
     if (geminiApiKey.isEmpty) return false;
@@ -19,6 +30,16 @@ class Constants {
     if (geminiApiKey == 'YOUR_API_KEY_HERE') return false;
     return geminiApiKey.startsWith('AIza') && geminiApiKey.length > 30;
   }
+
+  static bool get isCohereConfigured {
+    if (cohereApiKey.isEmpty) return false;
+    if (cohereApiKey == 'YOUR_COHERE_API_KEY_HERE') return false;
+    return cohereApiKey.length > 20;
+  }
+
+  static bool get isAnyAIConfigured => isGeminiConfigured || isCohereConfigured;
+
+  static const String sentimentApiUrl = '';
 
   static bool get isSentimentApiConfigured =>
       sentimentApiUrl.isNotEmpty &&
@@ -95,17 +116,17 @@ class Constants {
   static const int maxPlantLevel = 10;
 
   static const List<String> plantStageNames = [
-    'Seedling',        // Level 0
-    'Tiny Sprout',     // Level 1
-    'Sprout',    // Level 2
-    'Small Plant',     // Level 3
-    'Young Plant',   // Level 4
-    'Blooming',        // Level 5
-    'Flowering',       // Level 6
-    'Big Flower',      // Level 7
-    'Sunflower',       // Level 8
-    'Small Tree',      // Level 9
-    'Mighty Tree',     // Level 10
+    'Seedling',
+    'Tiny Sprout',
+    'Sprout',
+    'Small Plant',
+    'Young Plant',
+    'Blooming',
+    'Flowering',
+    'Big Flower',
+    'Sunflower',
+    'Small Tree',
+    'Mighty Tree',
   ];
 
   static String getPlantStageName(int level) {
@@ -286,7 +307,6 @@ class Constants {
     }
   }
 
-  /// Convert color to hex string
   static String colorToHex(Color color, {bool includeHash = true}) {
     final hex = color.value.toRadixString(16).padLeft(8, '0').substring(2);
     return includeHash ? '#$hex' : hex;

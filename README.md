@@ -1,7 +1,5 @@
 # 🌿 Thyme — AI-Powered Wellness Companion
 
-*Take your time to heal*
-
 Thyme is a gentle, gamified wellness app that combines AI-powered mood tracking, habit building, kindness journaling, and a virtual garden — all designed with calm gamification principles that support without pressuring.
 
 ## Features
@@ -97,7 +95,7 @@ flutter pub get
 1. Go to [Google AI Studio](https://aistudio.google.com/apikey)
 2. Sign in with your Google account
 3. Click **Create API Key**
-4. Copy the key (starts with `AIza...`)
+4. Copy the key
 
 > **Note:** The API key is never stored in source code. It is injected at build time via `--dart-define`.
 
@@ -122,30 +120,6 @@ flutter build appbundle --dart-define=GEMINI_API_KEY=YOUR_KEY_HERE
 
 # iOS
 flutter build ios --dart-define=GEMINI_API_KEY=YOUR_KEY_HERE
-```
-
----
-
-## IDE Configuration (Optional)
-
-### VS Code
-
-Create `.vscode/launch.json` (add to `.gitignore`):
-
-```json
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Thyme (with API key)",
-      "request": "launch",
-      "type": "dart",
-      "args": [
-        "--dart-define=GEMINI_API_KEY=YOUR_KEY_HERE"
-      ]
-    }
-  ]
-}
 ```
 
 ### Android Studio

@@ -340,6 +340,9 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
+          ),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -353,462 +356,463 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
           ),
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 48,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: CuteTheme.flowerCenter.withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(14),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 48,
+                      height: 5,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            CuteTheme.coralPink.withValues(alpha: 0.3),
-                            CuteTheme.petalPink.withValues(alpha: 0.3),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: CuteTheme.coralPink.withValues(alpha: 0.2),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Text('💝', style: TextStyle(fontSize: 28)),
-                    ),
-                    const SizedBox(width: 16),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Share Your Kindness',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              color: CuteTheme.textPrimary,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Every ripple matters~ 🌊',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: CuteTheme.textHint,
-                            ),
-                          ),
-                        ],
+                        color: CuteTheme.flowerCenter.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(3),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: CuteTheme.sunnyYellow.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: CuteTheme.warningColor.withValues(alpha: 0.3)),
                   ),
-                  child: Row(
+                  const SizedBox(height: 24),
+                  Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: CuteTheme.warningColor.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Text('💡', style: TextStyle(fontSize: 18)),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          Provider.of<KindnessController>(context, listen: false)
-                              .getMoodAwarePrompt(
-                            _getCurrentMood(),
-                          ),
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.amber[800],
-                            fontStyle: FontStyle.italic,
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: CuteTheme.coralPink.withValues(alpha: 0.1),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    controller: descController,
-                    maxLines: 3,
-                    style: const TextStyle(fontSize: 15, height: 1.5),
-                    decoration: InputDecoration(
-                      labelText: 'What kindness did you share?',
-                      labelStyle: const TextStyle(color: CuteTheme.textHint),
-                      hintText: 'e.g., Made tea for a tired friend~ 🍵',
-                      hintStyle: TextStyle(color: CuteTheme.textHint.withValues(alpha: 0.7), fontSize: 14),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: const BorderSide(color: CuteTheme.borderLight),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: const BorderSide(color: CuteTheme.coralPink, width: 2),
-                      ),
-                      contentPadding: const EdgeInsets.all(18),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: KindnessController.getQuickSuggestions(selectedCategory)
-                      .take(3)
-                      .map((suggestion) {
-                    return GestureDetector(
-                      onTap: () {
-                        descController.text = suggestion;
-                        // Move cursor to end
-                        descController.selection = TextSelection.fromPosition(
-                          TextPosition(offset: suggestion.length),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: CuteTheme.petalPink.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: CuteTheme.coralPink.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Text(
-                          suggestion,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: CuteTheme.textSecondary,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 20),
-                const Row(
-                  children: [
-                    Text('🏷️', style: TextStyle(fontSize: 16)),
-                    SizedBox(width: 8),
-                    Text(
-                      'Who received your kindness?',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                        color: CuteTheme.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: KindnessCategory.categories.entries.map((entry) {
-                    final isSelected = selectedCategory == entry.key;
-                    return GestureDetector(
-                      onTap: () => setModalState(() => selectedCategory = entry.key),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeOutCubic,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        decoration: BoxDecoration(
-                          gradient: isSelected
-                              ? LinearGradient(
+                          gradient: LinearGradient(
                             colors: [
                               CuteTheme.coralPink.withValues(alpha: 0.3),
-                              CuteTheme.petalPink.withValues(alpha: 0.2),
+                              CuteTheme.petalPink.withValues(alpha: 0.3),
                             ],
-                          )
-                              : null,
-                          color: isSelected ? null : CuteTheme.backgroundColor,
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: isSelected
-                                ? CuteTheme.coralPink.withValues(alpha: 0.6)
-                                : Colors.transparent,
-                            width: 1.5,
                           ),
-                          boxShadow: isSelected
-                              ? [
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
                             BoxShadow(
                               color: CuteTheme.coralPink.withValues(alpha: 0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
-                          ]
-                              : null,
+                          ],
                         ),
-                        child: Text(
-                          entry.value,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: isSelected ? CuteTheme.flowerCenter : CuteTheme.textSecondary,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                          ),
-                        ),
+                        child: const Text('💝', style: TextStyle(fontSize: 28)),
                       ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: CuteTheme.lavender.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Row(
-                    children: [
-                      const Text('🌍', style: TextStyle(fontSize: 22)),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       const Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Share with Community',
+                              'Share Your Kindness',
                               style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
                                 color: CuteTheme.textPrimary,
                               ),
                             ),
+                            SizedBox(height: 4),
                             Text(
-                              'Inspire others (anonymously) +1 ☀️',
+                              'Every ripple matters~ 🌊',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 13,
                                 color: CuteTheme.textHint,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      Transform.scale(
-                        scale: 0.9,
-                        child: Switch(
-                          value: isPublic,
-                          onChanged: (value) => setModalState(() => isPublic = value),
-                          activeColor: CuteTheme.flowerCenter,
-                          activeTrackColor: CuteTheme.coralPink.withValues(alpha: 0.4),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: CuteTheme.sunnyYellow.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: CuteTheme.warningColor.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: CuteTheme.warningColor.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Text('💡', style: TextStyle(fontSize: 18)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            Provider.of<KindnessController>(context, listen: false)
+                                .getMoodAwarePrompt(
+                              _getCurrentMood(),
+                            ),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.amber[800],
+                              fontStyle: FontStyle.italic,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: CuteTheme.coralPink.withValues(alpha: 0.1),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: descController,
+                      maxLines: 3,
+                      style: const TextStyle(fontSize: 15, height: 1.5),
+                      decoration: InputDecoration(
+                        labelText: 'What kindness did you share?',
+                        labelStyle: const TextStyle(color: CuteTheme.textHint),
+                        hintText: 'e.g., Made tea for a tired friend~ 🍵',
+                        hintStyle: TextStyle(color: CuteTheme.textHint.withValues(alpha: 0.7), fontSize: 14),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: CuteTheme.borderLight),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: const BorderSide(color: CuteTheme.coralPink, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.all(18),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: KindnessController.getQuickSuggestions(selectedCategory)
+                        .take(3)
+                        .map((suggestion) {
+                      return GestureDetector(
+                        onTap: () {
+                          descController.text = suggestion;
+                          descController.selection = TextSelection.fromPosition(
+                            TextPosition(offset: suggestion.length),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: CuteTheme.petalPink.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: CuteTheme.coralPink.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Text(
+                            suggestion,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: CuteTheme.textSecondary,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 20),
+                  const Row(
+                    children: [
+                      Text('🏷️', style: TextStyle(fontSize: 16)),
+                      SizedBox(width: 8),
+                      Text(
+                        'Who received your kindness?',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          color: CuteTheme.textSecondary,
                         ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: KindnessCategory.categories.entries.map((entry) {
+                      final isSelected = selectedCategory == entry.key;
+                      return GestureDetector(
+                        onTap: () => setModalState(() => selectedCategory = entry.key),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeOutCubic,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            gradient: isSelected
+                                ? LinearGradient(
+                              colors: [
+                                CuteTheme.coralPink.withValues(alpha: 0.3),
+                                CuteTheme.petalPink.withValues(alpha: 0.2),
+                              ],
+                            )
+                                : null,
+                            color: isSelected ? null : CuteTheme.backgroundColor,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: isSelected
+                                  ? CuteTheme.coralPink.withValues(alpha: 0.6)
+                                  : Colors.transparent,
+                              width: 1.5,
+                            ),
+                            boxShadow: isSelected
+                                ? [
+                              BoxShadow(
+                                color: CuteTheme.coralPink.withValues(alpha: 0.2),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ]
+                                : null,
                           ),
-                          side: const BorderSide(color: CuteTheme.borderLight),
+                          child: Text(
+                            entry.value,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: isSelected ? CuteTheme.flowerCenter : CuteTheme.textSecondary,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                            ),
+                          ),
                         ),
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(color: CuteTheme.textSecondary),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: CuteTheme.lavender.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Row(
+                      children: [
+                        const Text('🌍', style: TextStyle(fontSize: 22)),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Share with Community',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
+                                  color: CuteTheme.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                'Inspire others (anonymously) +1 ☀️',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: CuteTheme.textHint,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Transform.scale(
+                          scale: 0.9,
+                          child: Switch(
+                            value: isPublic,
+                            onChanged: (value) => setModalState(() => isPublic = value),
+                            activeColor: CuteTheme.flowerCenter,
+                            activeTrackColor: CuteTheme.coralPink.withValues(alpha: 0.4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            side: const BorderSide(color: CuteTheme.borderLight),
+                          ),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(color: CuteTheme.textSecondary),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      flex: 2,
-                      child: Consumer<KindnessController>(
-                        builder: (context, kindnessController, _) {
-                          return ElevatedButton(
-                            onPressed: kindnessController.isLoading
-                                ? null
-                                : () async {
-                              if (descController.text.trim().isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: const Row(
-                                      children: [
-                                        Text('✏️', style: TextStyle(fontSize: 16)),
-                                        SizedBox(width: 8),
-                                        Expanded(child: Text('Please describe your kindness~')),
-                                      ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: Consumer<KindnessController>(
+                          builder: (context, kindnessController, _) {
+                            return ElevatedButton(
+                              onPressed: kindnessController.isLoading
+                                  ? null
+                                  : () async {
+                                if (descController.text.trim().isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: const Row(
+                                        children: [
+                                          Text('✏️', style: TextStyle(fontSize: 16)),
+                                          SizedBox(width: 8),
+                                          Expanded(child: Text('Please describe your kindness~')),
+                                        ],
+                                      ),
+                                      backgroundColor: CuteTheme.warningColor,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
                                     ),
-                                    backgroundColor: CuteTheme.warningColor,
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
+                                  );
+                                  return;
+                                }
+
+                                final authController =
+                                Provider.of<AuthController>(context, listen: false);
+                                final gardenController =
+                                Provider.of<GardenController>(context, listen: false);
+                                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                                final description = descController.text.trim();
+                                final category = selectedCategory;
+                                final publicFlag = isPublic;
+
+                                if (authController.currentUser == null) {
+                                  scaffoldMessenger.showSnackBar(
+                                    SnackBar(
+                                      content: const Text('Please login first'),
+                                      backgroundColor: CuteTheme.errorColor,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
                                     ),
-                                  ),
-                                );
-                                return;
-                              }
+                                  );
+                                  return;
+                                }
 
-                              final authController =
-                              Provider.of<AuthController>(context, listen: false);
-                              final gardenController =
-                              Provider.of<GardenController>(context, listen: false);
-                              final scaffoldMessenger = ScaffoldMessenger.of(context);
-                              final description = descController.text.trim();
-                              final category = selectedCategory;
-                              final publicFlag = isPublic;
+                                final userId = authController.currentUser!.uid;
 
-                              if (authController.currentUser == null) {
-                                scaffoldMessenger.showSnackBar(
-                                  SnackBar(
-                                    content: const Text('Please login first'),
-                                    backgroundColor: CuteTheme.errorColor,
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                  ),
-                                );
-                                return;
-                              }
+                                Navigator.pop(context);
 
-                              final userId = authController.currentUser!.uid;
+                                try {
+                                  final success = await kindnessController.addKindnessAct(
+                                    userId: userId,
+                                    description: description,
+                                    category: category,
+                                    isPublic: publicFlag,
+                                  );
 
-                              Navigator.pop(context);
+                                  if (success && mounted) {
+                                    if (kindnessController.onRewardEarned == null) {
+                                      final rewards = kindnessController.getLastRewardValues();
+                                      await gardenController.addKindnessReward(
+                                        sunlight: rewards['sunlight'] ?? 2,
+                                        water: rewards['water'] ?? 1,
+                                      );
+                                    }
 
-                              try {
-                                final success = await kindnessController.addKindnessAct(
-                                  userId: userId,
-                                  description: description,
-                                  category: category,
-                                  isPublic: publicFlag,
-                                );
+                                    if (mounted) {
+                                      _showKindnessAddedFeedback(kindnessController.lastRewardInfo);
 
-                                if (success && mounted) {
-                                  if (kindnessController.onRewardEarned == null) {
-                                    final rewards = kindnessController.getLastRewardValues();
-                                    await gardenController.addKindnessReward(
-                                      sunlight: rewards['sunlight'] ?? 2,
-                                      water: rewards['water'] ?? 1,
+                                      Future.delayed(const Duration(seconds: 4), () {
+                                        if (mounted) {
+                                          _checkStreakMilestone(kindnessController);
+                                        }
+                                      });
+                                    }
+                                  } else if (mounted) {
+                                    scaffoldMessenger.showSnackBar(
+                                      SnackBar(
+                                        content: Text(kindnessController.errorMessage ?? 'Something went wrong...'),
+                                        backgroundColor: CuteTheme.errorColor,
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(14),
+                                        ),
+                                      ),
                                     );
                                   }
-
+                                } catch (e) {
+                                  debugPrint('Error adding kindness: $e');
                                   if (mounted) {
-                                    _showKindnessAddedFeedback(kindnessController.lastRewardInfo);
-
-                                    Future.delayed(const Duration(seconds: 4), () {
-                                      if (mounted) {
-                                        _checkStreakMilestone(kindnessController);
-                                      }
-                                    });
+                                    scaffoldMessenger.showSnackBar(
+                                      SnackBar(
+                                        content: Text('Error: $e'),
+                                        backgroundColor: CuteTheme.errorColor,
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(14),
+                                        ),
+                                      ),
+                                    );
                                   }
-                                } else if (mounted) {
-                                  scaffoldMessenger.showSnackBar(
-                                    SnackBar(
-                                      content: Text(kindnessController.errorMessage ?? 'Something went wrong...'),
-                                      backgroundColor: CuteTheme.errorColor,
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                    ),
-                                  );
                                 }
-                              } catch (e) {
-                                debugPrint('Error adding kindness: $e');
-                                if (mounted) {
-                                  scaffoldMessenger.showSnackBar(
-                                    SnackBar(
-                                      content: Text('Error: $e'),
-                                      backgroundColor: CuteTheme.errorColor,
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: CuteTheme.flowerCenter,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              elevation: 4,
-                              shadowColor: CuteTheme.coralPink.withValues(alpha: 0.4),
-                            ),
-                            child: kindnessController.isLoading
-                                ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                                : const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text('💝', style: TextStyle(fontSize: 18)),
-                                SizedBox(width: 10),
-                                Text(
-                                  'Plant This Kindness',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: CuteTheme.flowerCenter,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
-                              ],
-                            ),
-                          );
-                        },
+                                elevation: 4,
+                                shadowColor: CuteTheme.coralPink.withValues(alpha: 0.4),
+                              ),
+                              child: kindnessController.isLoading
+                                  ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                                  : const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('💝', style: TextStyle(fontSize: 18)),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    'Plant This Kindness',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-              ],
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
           ),
         ),
@@ -822,78 +826,88 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
       builder: (context, kindnessController, _) {
         return Column(
           children: [
-            _buildStatsCard(kindnessController),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: CuteTheme.coralPink.withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: TabBar(
-                controller: _tabController,
-                indicator: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      CuteTheme.coralPink.withValues(alpha: 0.8),
-                      CuteTheme.flowerCenter.withValues(alpha: 0.8),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicatorPadding: const EdgeInsets.all(4),
-                labelColor: Colors.white,
-                unselectedLabelColor: CuteTheme.textSecondary,
-                labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
-                tabs: const [
-                  Tab(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('💚', style: TextStyle(fontSize: 14)),
-                        SizedBox(width: 6),
-                        Text('My Garden'),
-                      ],
-                    ),
-                  ),
-                  Tab(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('🌍', style: TextStyle(fontSize: 14)),
-                        SizedBox(width: 6),
-                        Text('Community'),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
             Expanded(
-              child: Stack(
-                children: [
-                  TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildMyKindnessTab(kindnessController),
-                      _buildCommunityTab(kindnessController),
-                    ],
-                  ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: _buildFloatingButtonArea(),
-                  ),
-                ],
+              child: NestedScrollView(
+                headerSliverBuilder: (context, innerBoxIsScrolled) {
+                  return [
+                    SliverToBoxAdapter(
+                      child: _buildStatsCard(kindnessController),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: CuteTheme.coralPink.withValues(alpha: 0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: TabBar(
+                          controller: _tabController,
+                          indicator: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                CuteTheme.coralPink.withValues(alpha: 0.8),
+                                CuteTheme.flowerCenter.withValues(alpha: 0.8),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          indicatorPadding: const EdgeInsets.all(4),
+                          labelColor: Colors.white,
+                          unselectedLabelColor: CuteTheme.textSecondary,
+                          labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
+                          tabs: const [
+                            Tab(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('💚', style: TextStyle(fontSize: 14)),
+                                  SizedBox(width: 6),
+                                  Text('My Garden'),
+                                ],
+                              ),
+                            ),
+                            Tab(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('🌍', style: TextStyle(fontSize: 14)),
+                                  SizedBox(width: 6),
+                                  Text('Community'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ];
+                },
+                body: Stack(
+                  children: [
+                    TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildMyKindnessTab(kindnessController),
+                        _buildCommunityTab(kindnessController),
+                      ],
+                    ),
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: _buildFloatingButtonArea(),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -964,43 +978,50 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
           ),
           const SizedBox(height: 20),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(18),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildStatItem(
-                  emoji: '💝',
-                  value: controller.totalKindnessCount.toString(),
-                  label: 'Total',
-                  color: CuteTheme.flowerCenter,
-                ),
-                Container(
-                  width: 1,
-                  height: 40,
-                  color: CuteTheme.borderLight,
-                ),
-                _buildStatItem(
-                  emoji: '🌸',
-                  value: controller.weeklyKindnessCount.toString(),
-                  label: 'This Week',
-                  color: CuteTheme.coralPink,
-                ),
-                Container(
-                  width: 1,
-                  height: 40,
-                  color: CuteTheme.borderLight,
-                ),
-                _buildStatItem(
-                  emoji: '🔥',
-                  value: '${controller.currentStreak}',
-                  label: 'Day Streak',
-                  color: CuteTheme.warmOrange,
-                ),
-              ],
+            child: IntrinsicHeight(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildStatItem(
+                      emoji: '💝',
+                      value: controller.totalKindnessCount.toString(),
+                      label: 'Total',
+                      color: CuteTheme.flowerCenter,
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    color: CuteTheme.borderLight,
+                  ),
+                  Expanded(
+                    child: _buildStatItem(
+                      emoji: '🌸',
+                      value: controller.weeklyKindnessCount.toString(),
+                      label: 'This Week',
+                      color: CuteTheme.coralPink,
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    color: CuteTheme.borderLight,
+                  ),
+                  Expanded(
+                    child: _buildStatItem(
+                      emoji: '🔥',
+                      value: '${controller.currentStreak}',
+                      label: 'Day Streak',
+                      color: CuteTheme.warmOrange,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           // ✅ NEW: Category distribution visual
@@ -1104,27 +1125,30 @@ class _KindnessChainScreenState extends State<KindnessChainScreen>
     required String label,
     required Color color,
   }) {
-    return Column(
-      children: [
-        Text(emoji, style: const TextStyle(fontSize: 20)),
-        const SizedBox(height: 6),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: color,
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 20)),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 11,
-            color: CuteTheme.textHint,
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              color: CuteTheme.textHint,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

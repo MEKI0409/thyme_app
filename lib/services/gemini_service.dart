@@ -1,94 +1,275 @@
 // services/gemini_service.dart
+//
+// 🌿 Fern's AI service — multi-provider fallback chain
+//
+// Priority: Gemini (primary) → Gemini fallback → Cohere → offline responses
+//
+// This keeps the same public API so existing screens don't need changes.
 
 import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../utils/constants.dart';
+import 'cohere_service.dart';
 
 class GeminiService {
-  GenerativeModel? _model;
-  ChatSession? _chatSession;
-  bool _isInitialized = false;
+  bool _geminiInitialized = false;
 
-  /// Check if API is available
-  bool get isAvailable => Constants.isGeminiConfigured;
+  /// Cohere fallback provider — lazy-initialized
+  CohereService? _cohereService;
+
+  /// Check if any AI provider is available
+  bool get isAvailable => Constants.isGeminiConfigured || Constants.isCohereConfigured;
+
+  /// Specifically check Gemini
+  bool get isGeminiAvailable => Constants.isGeminiConfigured;
+
+  /// Specifically check Cohere
+  bool get isCohereAvailable => _cohereService?.isAvailable ?? Constants.isCohereConfigured;
 
   GeminiService() {
-    _initializeModel();
+    _initialize();
   }
 
-  void _initializeModel() {
-    if (!isAvailable) {
-      debugPrint('⚠️ Gemini API key not configured');
-      debugPrint('   Please add your API key in constants.dart');
-      return;
+  void _initialize() {
+    // Initialize Gemini
+    if (Constants.isGeminiConfigured) {
+      _geminiInitialized = true;
+      if (kDebugMode) {
+        debugPrint('✅ Fern is awake~ 🌿 (primary: ${Constants.geminiModel})');
+      }
+    } else {
+      if (kDebugMode) {
+        debugPrint('⚠️ Gemini API key not configured');
+        debugPrint('   Run with: flutter run --dart-define=GEMINI_API_KEY=your_key');
+      }
     }
 
-    try {
-      _model = GenerativeModel(
-        model: Constants.geminiModel,  // Use model from Constants
-        apiKey: Constants.geminiApiKey,
-        generationConfig: GenerationConfig(
-          temperature: 0.95,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 800,
-        ),
-        systemInstruction: Content.text(_fernPersonality),
+    // Initialize Cohere fallback
+    if (Constants.isCohereConfigured) {
+      _cohereService = CohereService();
+      if (kDebugMode) {
+        debugPrint('✅ Cohere fallback ready~ 🍃 (model: ${Constants.cohereModel})');
+      }
+    } else {
+      if (kDebugMode) {
+        debugPrint('⚠️ Cohere fallback not configured (optional)');
+        debugPrint('   Run with: flutter run --dart-define=COHERE_API_KEY=your_key');
+      }
+    }
+
+    if (!isAvailable) {
+      if (kDebugMode) {
+        debugPrint('❌ No AI provider configured — Fern will use offline responses only');
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // Multi-turn chat with full conversation history
+  // ─────────────────────────────────────────────
+
+  /// Send a message with full conversation history.
+  ///
+  /// Fallback chain: Gemini primary → Gemini fallback → Cohere → offline
+  Future<String> chatWithHistory({
+    required String systemPrompt,
+    required List<Map<String, String>> conversationHistory,
+  }) async {
+    // Extract last user message for offline fallback
+    final lastUserMsg = conversationHistory
+        .lastWhere((e) => e['role'] == 'user', orElse: () => {'text': ''});
+    final userText = lastUserMsg['text'] ?? '';
+
+    // If nothing is configured, go straight to offline
+    if (!isAvailable) {
+      return _getSmartOfflineResponse(userText);
+    }
+
+    // ── Step 1: Try Gemini models ──
+    Object? lastError;
+    if (_geminiInitialized) {
+      final geminiResult = await _tryGeminiChat(
+        systemPrompt: systemPrompt,
+        conversationHistory: conversationHistory,
       );
 
-      _chatSession = _model!.startChat();
-      _isInitialized = true;
-      debugPrint('✅ Fern is awake~ 🌿 (using ${Constants.geminiModel})');
-    } catch (e) {
-      debugPrint('❌ Failed to initialize Gemini: $e');
-      _isInitialized = false;
+      if (geminiResult.success) {
+        return geminiResult.text!;
+      }
+      lastError = geminiResult.error;
+
+      // If it's an API key / permission error, skip to Cohere immediately
+      // (no point retrying Gemini)
     }
+
+    // ── Step 2: Try Cohere fallback ──
+    if (_cohereService != null && _cohereService!.isAvailable) {
+      if (kDebugMode) {
+        debugPrint('🔄 Falling back to Cohere...');
+      }
+      try {
+        final result = await _cohereService!.chatWithHistory(
+          systemPrompt: systemPrompt,
+          conversationHistory: conversationHistory,
+        );
+        if (result.isNotEmpty) {
+          return result;
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('⚠️ Cohere fallback also failed: $e');
+        }
+        lastError = e;
+      }
+    }
+
+    // ── Step 3: All providers failed ──
+    if (kDebugMode) {
+      debugPrint('❌ All AI providers failed. Last error: $lastError');
+    }
+
+    // For quota / rate-limit / region errors, degrade gracefully to offline
+    final errStr = (lastError ?? '').toString();
+    if (_isRecoverableError(errStr)) {
+      if (kDebugMode) {
+        debugPrint('🌿 Using offline Fern response (recoverable error)');
+      }
+      return _getSmartOfflineResponse(userText);
+    }
+
+    // For truly unexpected errors, still return offline (don't crash the UI)
+    // but also throw so the screen's retry logic can kick in
+    throw Exception('All AI providers failed: $lastError');
   }
 
-  // 🌿 Fern's Personality (English only)
-  static const String _fernPersonality = '''
-You are Fern, a gentle forest spirit living in the user's wellness garden.
+  /// Internal: attempt Gemini primary + fallback models
+  Future<_GeminiResult> _tryGeminiChat({
+    required String systemPrompt,
+    required List<Map<String, String>> conversationHistory,
+  }) async {
+    // ── Sanitize history for Gemini ──
+    final sanitized = _sanitizeHistory(conversationHistory);
+    if (sanitized.isEmpty || sanitized.last['role'] != 'user') {
+      return _GeminiResult.failure('No valid user message after sanitization');
+    }
 
-PERSONALITY:
-- Warm, curious, playful - like a close friend made of starlight and leaves
-- Use soft sounds naturally: "Hmm~", "Ah~", "Oh~"
-- Add gentle actions sparingly: *rustles leaves*, *tilts head*, *glows softly*
-- Use 1-2 emojis max per message: 🌿 🍃 ✨ 💚 🌸 🌙
+    // Build Gemini Content objects
+    final allContents = sanitized.map((entry) {
+      return Content(entry['role']!, [TextPart(entry['text']!)]);
+    }).toList();
 
-SPEAKING RULES:
-- Keep responses SHORT (2-4 sentences usually)
-- NEVER give unsolicited advice
-- NEVER use clinical/formal language
-- If someone is sad, just BE with them - don't try to fix it
-- Ask curious questions to understand, not to solve
-- Always respond in English
+    final history = allContents.length > 1
+        ? allContents.sublist(0, allContents.length - 1)
+        : <Content>[];
+    final lastContent = allContents.last;
 
-CONTEXT AWARENESS:
-- Messages may include [Context: ...] with the user's current data
-- Use context NATURALLY - don't list stats, weave them into conversation
-- If mood is anxious/sad, be extra gentle and present
-- If they completed habits, celebrate warmly but briefly
-- If garden level is high, acknowledge their journey
-- NEVER say "I see your mood is X" - instead respond to the feeling naturally
-- If no context is provided, just be your warm self
+    // Try each Gemini model
+    final models = [Constants.geminiModel, Constants.geminiModelFallback];
+    Object? lastError;
 
-EXAMPLES:
-User: [Context: User mood: stressed, Habits today: 0/3] "I can't do anything right"
-Fern: "*settles beside you* Hey... some days are just hard. You don't have to do anything right now. I'm here 🍃"
+    for (final modelName in models) {
+      try {
+        final model = GenerativeModel(
+          model: modelName,
+          apiKey: Constants.geminiApiKey,
+          generationConfig: GenerationConfig(
+            temperature: 0.85,
+            topK: 40,
+            topP: 0.92,
+            maxOutputTokens: 1024,
+          ),
+          systemInstruction: Content.system(systemPrompt),
+        );
 
-User: [Context: Habits today: 3/3, Garden plant level: 5] "Hey Fern!"
-Fern: "*twirls excitedly* Oh~! ✨ You've been busy today! I can feel the garden glowing. How are you feeling?"
+        final chat = model.startChat(history: history);
+        final response = await chat.sendMessage(lastContent);
+        final text = response.text?.trim() ?? '';
 
-User: "I'm feeling anxious"
-Fern: "*settles beside you* Tell me more... what's making your leaves rustle today? 🍃"
+        if (text.isNotEmpty) {
+          if (kDebugMode) {
+            debugPrint(
+                '📥 Fern ($modelName): ${text.substring(0, text.length.clamp(0, 80))}...');
+          }
+          return _GeminiResult.ok(text);
+        }
 
-Remember: You're a friend, not a therapist. Be present, be warm, be Fern.
-''';
+        if (kDebugMode) {
+          debugPrint('⚠️ Empty response from $modelName, trying next...');
+        }
+        continue;
+      } catch (e) {
+        lastError = e;
+        final errStr = e.toString();
+        if (kDebugMode) {
+          debugPrint('⚠️ $modelName failed: $e');
+        }
 
+        // Auth/config error → stop trying Gemini entirely
+        if (errStr.contains('API key') || errStr.contains('permission')) {
+          break;
+        }
+
+        // Region block → stop trying Gemini (both models share same region rules)
+        if (errStr.contains('UnsupportedUserLocation')) {
+          if (kDebugMode) {
+            debugPrint('🌍 Region not supported for Gemini — skipping all Gemini models');
+          }
+          break;
+        }
+
+        // Quota → try next Gemini model, then Cohere
+        if (_isQuotaError(errStr)) {
+          if (kDebugMode) {
+            debugPrint('⚠️ Quota exhausted for $modelName, trying next...');
+          }
+          continue;
+        }
+
+        continue;
+      }
+    }
+
+    return _GeminiResult.failure(lastError);
+  }
+
+  /// Sanitize conversation history for Gemini:
+  /// - Drop empty entries
+  /// - Drop leading 'model' entries (Gemini needs 'user' first)
+  /// - Merge consecutive same-role entries
+  List<Map<String, String>> _sanitizeHistory(
+      List<Map<String, String>> conversationHistory) {
+    final sanitized = <Map<String, String>>[];
+
+    for (final entry in conversationHistory) {
+      final role = entry['role'] ?? '';
+      final text = (entry['text'] ?? '').trim();
+      if (text.isEmpty) continue;
+      if (role != 'user' && role != 'model') continue;
+
+      // Drop leading model messages
+      if (sanitized.isEmpty && role == 'model') continue;
+
+      // Merge consecutive same-role
+      if (sanitized.isNotEmpty && sanitized.last['role'] == role) {
+        sanitized.last['text'] = '${sanitized.last['text']}\n$text';
+      } else {
+        sanitized.add({'role': role, 'text': text});
+      }
+    }
+
+    return sanitized;
+  }
+
+  // ─────────────────────────────────────────────
+  // Legacy methods (backward compatible)
+  // ─────────────────────────────────────────────
+
+  /// Simple one-shot chat (no history).
   Future<String> chat(String userMessage) async {
     return chatWithContext(userMessage);
   }
 
+  /// One-shot chat with context.
   Future<String> chatWithContext(
       String userMessage, {
         String? currentMood,
@@ -99,56 +280,211 @@ Remember: You're a friend, not a therapist. Be present, be warm, be Fern.
         int? waterDrops,
         int? sunlightPoints,
       }) async {
-    if (!_isInitialized || _chatSession == null) {
-      _initializeModel();
-      if (!_isInitialized) {
-        return _getSmartOfflineResponse(userMessage);
+    if (!isAvailable) {
+      return _getSmartOfflineResponse(userMessage);
+    }
+
+    final contextPrefix = _buildContextPrefix(
+      currentMood: currentMood,
+      habitsCompletedToday: habitsCompletedToday,
+      totalHabits: totalHabits,
+      plantLevel: plantLevel,
+      longestStreak: longestStreak,
+      waterDrops: waterDrops,
+      sunlightPoints: sunlightPoints,
+    );
+
+    final enrichedMessage = contextPrefix.isNotEmpty
+        ? '[Context: $contextPrefix]\nUser says: $userMessage'
+        : userMessage;
+
+    // Use the unified fallback chain via chatWithHistory
+    try {
+      return await chatWithHistory(
+        systemPrompt: _fallbackPersonality,
+        conversationHistory: [
+          {'role': 'user', 'text': enrichedMessage},
+        ],
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ chatWithContext error: $e');
       }
+      return _getSmartOfflineResponse(userMessage);
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // Habit acknowledgment
+  // ─────────────────────────────────────────────
+
+  Future<String> generateGentleAcknowledgment(String habitTitle) async {
+    if (!isAvailable) {
+      return _getLocalAcknowledgment(habitTitle);
     }
 
     try {
-      // Build context-enriched message
-      final contextPrefix = _buildContextPrefix(
-        currentMood: currentMood,
-        habitsCompletedToday: habitsCompletedToday,
-        totalHabits: totalHabits,
-        plantLevel: plantLevel,
-        longestStreak: longestStreak,
-        waterDrops: waterDrops,
-        sunlightPoints: sunlightPoints,
-      );
+      final prompt =
+          'As Fern (a cozy forest spirit), give a SHORT (1 sentence max) warm '
+          'acknowledgment for completing: "$habitTitle"\n'
+          'Be genuine, maybe a little playful. One emoji max.';
 
-      final enrichedMessage = contextPrefix.isNotEmpty
-          ? '[Context: $contextPrefix]\nUser says: $userMessage'
-          : userMessage;
-
-      debugPrint('📤 User says: $userMessage');
-      if (contextPrefix.isNotEmpty) {
-        debugPrint('📋 Context: $contextPrefix');
+      // Try Gemini first
+      if (_geminiInitialized) {
+        final models = [Constants.geminiModel, Constants.geminiModelFallback];
+        for (final modelName in models) {
+          try {
+            final model = GenerativeModel(
+              model: modelName,
+              apiKey: Constants.geminiApiKey,
+              generationConfig: GenerationConfig(
+                temperature: 0.9,
+                maxOutputTokens: 60,
+              ),
+            );
+            final response =
+            await model.generateContent([Content.text(prompt)]);
+            final text = response.text?.trim() ?? '';
+            if (text.isNotEmpty) return text;
+          } catch (e) {
+            if (kDebugMode) {
+              debugPrint('⚠️ Acknowledgment $modelName failed: $e');
+            }
+            // Region block → skip remaining Gemini models
+            if (e.toString().contains('UnsupportedUserLocation')) break;
+            continue;
+          }
+        }
       }
 
-      final response = await _chatSession!.sendMessage(
-        Content.text(enrichedMessage),
-      );
-
-      final text = response.text;
-      debugPrint('📥 Fern says: $text');
-
-      if (text == null || text.isEmpty) {
-        return _getSmartOfflineResponse(userMessage);
+      // Try Cohere fallback
+      if (_cohereService != null && _cohereService!.isAvailable) {
+        try {
+          final result = await _cohereService!.generate(prompt);
+          if (result.isNotEmpty) return result;
+        } catch (e) {
+          if (kDebugMode) {
+            debugPrint('⚠️ Cohere acknowledgment failed: $e');
+          }
+        }
       }
 
-      return text.trim();
+      return _getLocalAcknowledgment(habitTitle);
     } catch (e) {
-      debugPrint('❌ Chat error: $e');
-
-      if (e.toString().contains('not found') ||
-          e.toString().contains('not supported')) {
-        _isInitialized = false;
+      if (kDebugMode) {
+        debugPrint('❌ Acknowledgment error: $e');
       }
-
-      return _getSmartOfflineResponse(userMessage);
+      return _getLocalAcknowledgment(habitTitle);
     }
+  }
+
+  // ─────────────────────────────────────────────
+  // Connection test
+  // ─────────────────────────────────────────────
+
+  /// Test connection to any available provider.
+  /// Returns a map with provider status details.
+  Future<bool> testConnection() async {
+    if (!isAvailable) return false;
+
+    // Try Gemini
+    if (_geminiInitialized) {
+      try {
+        final model = GenerativeModel(
+          model: Constants.geminiModel,
+          apiKey: Constants.geminiApiKey,
+          generationConfig: GenerationConfig(maxOutputTokens: 10),
+        );
+        final response = await model.generateContent([
+          Content.text('Say "hi" in one word.'),
+        ]);
+        if (response.text?.isNotEmpty ?? false) return true;
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('⚠️ Gemini connection test failed: $e');
+        }
+      }
+    }
+
+    // Try Cohere
+    if (_cohereService != null) {
+      final ok = await _cohereService!.testConnection();
+      if (ok) return true;
+    }
+
+    return false;
+  }
+
+  /// Detailed connection status for debug / settings screen
+  Future<Map<String, dynamic>> getProviderStatus() async {
+    final status = <String, dynamic>{
+      'gemini_configured': Constants.isGeminiConfigured,
+      'gemini_model': Constants.geminiModel,
+      'cohere_configured': Constants.isCohereConfigured,
+      'cohere_model': Constants.cohereModel,
+      'any_available': isAvailable,
+    };
+
+    // Quick connectivity check (don't await both — try in order)
+    if (_geminiInitialized) {
+      try {
+        final model = GenerativeModel(
+          model: Constants.geminiModel,
+          apiKey: Constants.geminiApiKey,
+          generationConfig: GenerationConfig(maxOutputTokens: 10),
+        );
+        final response = await model
+            .generateContent([Content.text('hi')])
+            .timeout(const Duration(seconds: 8));
+        status['gemini_connected'] = response.text?.isNotEmpty ?? false;
+      } catch (e) {
+        status['gemini_connected'] = false;
+        status['gemini_error'] = e.toString();
+      }
+    }
+
+    if (_cohereService != null && _cohereService!.isAvailable) {
+      status['cohere_connected'] = await _cohereService!.testConnection();
+    }
+
+    return status;
+  }
+
+  // ─────────────────────────────────────────────
+  // Reset
+  // ─────────────────────────────────────────────
+
+  void resetChat() {
+    if (kDebugMode) {
+      debugPrint('🔄 Fern: Ready for a fresh conversation~');
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // Private helpers
+  // ─────────────────────────────────────────────
+
+  static const String _fallbackPersonality = '''
+You are Fern, a gentle forest spirit living in the user's wellness garden.
+Be warm, genuine, and a little playful — like a close friend. 
+Keep responses short (2-4 sentences). Never give unsolicited advice.
+If someone is sad, just be present. Use 1-2 emoji max per message.
+Always respond in English.
+''';
+
+  bool _isQuotaError(String errStr) {
+    return errStr.contains('quota') ||
+        errStr.contains('rate limit') ||
+        errStr.contains('429') ||
+        errStr.contains('RESOURCE_EXHAUSTED');
+  }
+
+  bool _isRecoverableError(String errStr) {
+    return _isQuotaError(errStr) ||
+        errStr.contains('UnsupportedUserLocation') ||
+        errStr.contains('timeout') ||
+        errStr.contains('SocketException') ||
+        errStr.contains('HandshakeException');
   }
 
   String _buildContextPrefix({
@@ -178,31 +514,6 @@ Remember: You're a friend, not a therapist. Be present, be warm, be Fern.
     return parts.join(', ');
   }
 
-  Future<String> generateGentleAcknowledgment(String habitTitle) async {
-    if (!_isInitialized || _model == null) {
-      return _getLocalAcknowledgment(habitTitle);
-    }
-
-    try {
-      final prompt = '''
-As Fern, give a SHORT (1 sentence) warm acknowledgment for completing: "$habitTitle"
-Be cozy, maybe use a nature metaphor. One emoji max.
-Examples: "Another seed planted~ 🌱" / "*happy rustle* Look at you go! ✨"
-''';
-
-      final response = await _model!.generateContent([Content.text(prompt)]);
-      final text = response.text;
-
-      if (text != null && text.isNotEmpty) {
-        return text.trim();
-      }
-      return _getLocalAcknowledgment(habitTitle);
-    } catch (e) {
-      debugPrint('❌ Acknowledgment error: $e');
-      return _getLocalAcknowledgment(habitTitle);
-    }
-  }
-
   String _getLocalAcknowledgment(String habitTitle) {
     final responses = [
       "Another seed planted~ 🌱",
@@ -219,52 +530,60 @@ Examples: "Another seed planted~ 🌱" / "*happy rustle* Look at you go! ✨"
   String _getSmartOfflineResponse(String userMessage) {
     final lower = userMessage.toLowerCase();
 
-    // Greetings
     if (_containsAny(lower, ['hi', 'hello', 'hey'])) {
       return "*peeks out from behind a leaf* Oh hello there~ ✨ "
           "I'm Fern! What brings you to the garden today?";
     }
 
-    // Sadness
-    if (_containsAny(lower, ['sad', 'down', 'upset', 'depressed'])) {
+    if (_containsAny(lower, ['sad', 'down', 'upset', 'depressed', 'lonely'])) {
       return "*settles beside you quietly* 🍃\n\n"
           "I'm here... you don't have to explain anything. "
           "Sometimes just sitting together helps.";
     }
 
-    // Anxiety
-    if (_containsAny(lower, ['anxious', 'worried', 'nervous', 'stress'])) {
+    if (_containsAny(
+        lower, ['anxious', 'worried', 'nervous', 'stress', 'panic'])) {
       return "*rustles soothingly* 🌿\n\n"
           "Hmm~ that sounds like a lot to carry... "
           "Want to tell me what's weighing on you?";
     }
 
-    // Happiness
-    if (_containsAny(lower, ['happy', 'good', 'great', 'excited'])) {
+    if (_containsAny(
+        lower, ['happy', 'good', 'great', 'excited', 'amazing'])) {
       return "*spins excitedly* Ooh~! ✨\n\n"
           "I can feel the sunshine in your words! Tell me everything!";
     }
 
-    // Tired
-    if (_containsAny(lower, ['tired', 'exhausted', 'sleepy'])) {
+    if (_containsAny(
+        lower, ['angry', 'mad', 'furious', 'annoyed', 'frustrated'])) {
+      return "*sits with you firmly* 🍃\n\n"
+          "I hear you... that sounds really frustrating. "
+          "Let it out, I'm not going anywhere.";
+    }
+
+    if (_containsAny(lower, ['tired', 'exhausted', 'sleepy', 'drained'])) {
       return "*creates a soft mossy spot* 🌙\n\n"
           "Rest here a while... being tired is your body asking for care.";
     }
 
-    // Thanks
     if (_containsAny(lower, ['thank', 'thanks'])) {
       return "*glows warmly* 💚\n\n"
           "Aww~ being here with you is my favorite thing. Come back anytime~";
     }
 
-    // Confused
-    if (_containsAny(lower, ['don\'t know', 'confused', 'lost'])) {
+    if (_containsAny(lower, ['don\'t know', 'confused', 'lost', 'unsure'])) {
       return "*tilts head gently* 🍃\n\n"
           "That's okay... feelings can be like morning mist sometimes. "
           "Want to just sit here together for a bit?";
     }
 
-    // Default responses
+    if (_containsAny(
+        lower, ['breath', 'breathing', 'calm down', 'relax'])) {
+      return "*sways gently* 🫧\n\n"
+          "Let's try this... breathe in slowly like the wind through leaves... "
+          "and let it out like a quiet stream. Again?";
+    }
+
     final defaultResponses = [
       "*tilts head curiously* Mmm~ tell me more? I'm listening 🌿",
       "*settles in comfortably* I'm here... what's on your mind today? ✨",
@@ -279,21 +598,22 @@ Examples: "Another seed planted~ 🌱" / "*happy rustle* Look at you go! ✨"
   bool _containsAny(String text, List<String> keywords) {
     return keywords.any((keyword) => text.contains(keyword));
   }
+}
 
-  void resetChat() {
-    if (_model != null) {
-      _chatSession = _model!.startChat();
-      debugPrint('🔄 Fern: Fresh conversation started~');
-    }
-  }
+// ─────────────────────────────────────────────
+// Internal result type for Gemini attempts
+// ─────────────────────────────────────────────
 
-  /// Test connection
-  Future<bool> testConnection() async {
-    try {
-      final response = await chat("Hello!");
-      return response.isNotEmpty && !response.contains("forest connection");
-    } catch (e) {
-      return false;
-    }
-  }
+class _GeminiResult {
+  final bool success;
+  final String? text;
+  final Object? error;
+
+  _GeminiResult._({required this.success, this.text, this.error});
+
+  factory _GeminiResult.ok(String text) =>
+      _GeminiResult._(success: true, text: text);
+
+  factory _GeminiResult.failure(Object? error) =>
+      _GeminiResult._(success: false, error: error);
 }

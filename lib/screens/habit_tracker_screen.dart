@@ -30,196 +30,198 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
     String selectedCategory = 'Self-Care';
 
     showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        decoration: const BoxDecoration(
-          color: CuteTheme.cardBg,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(CuteTheme.radiusXLarge),
-            topRight: Radius.circular(CuteTheme.radiusXLarge),
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: CuteTheme.borderLight,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
+          decoration: const BoxDecoration(
+            color: CuteTheme.cardBg,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(CuteTheme.radiusXLarge),
+              topRight: Radius.circular(CuteTheme.radiusXLarge),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          CuteTheme.primaryGreen.withValues(alpha: 0.15),
-                          CuteTheme.petalPink.withValues(alpha: 0.1),
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: CuteTheme.borderLight,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              CuteTheme.primaryGreen.withValues(alpha: 0.15),
+                              CuteTheme.petalPink.withValues(alpha: 0.1),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Text('🌱', style: TextStyle(fontSize: 24)),
+                      ),
+                      const SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Plant a New Habit',
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: CuteTheme.deepGreen,
+                            ),
+                          ),
+                          Text(
+                            'Small steps, meaningful growth',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: CuteTheme.textMuted,
+                            ),
+                          ),
                         ],
                       ),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Text('🌱', style: TextStyle(fontSize: 24)),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 28),
+                  _buildInputField(
+                    controller: titleController,
+                    label: 'Habit Name',
+                    hint: 'e.g., 5-minute breathing',
+                    icon: Icons.edit_outlined,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildInputField(
+                    controller: descController,
+                    label: 'Why does this matter to you?',
+                    hint: 'Optional, but helps with motivation',
+                    icon: Icons.favorite_outline,
+                    maxLines: 2,
+                  ),
+                  const SizedBox(height: 16),
+                  StatefulBuilder(
+                    builder: (context, setLocalState) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: CuteTheme.cream,
+                          borderRadius: BorderRadius.circular(CuteTheme.radiusMedium),
+                          border: Border.all(color: CuteTheme.borderLight),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: selectedCategory,
+                            isExpanded: true,
+                            icon: const Icon(Icons.expand_more, color: CuteTheme.textMuted),
+                            items: Constants.habitCategories.keys.map((category) {
+                              return DropdownMenuItem(
+                                value: category,
+                                child: Row(
+                                  children: [
+                                    CuteCategoryIcon(category: category, size: 24),
+                                    const SizedBox(width: 12),
+                                    Text(category, style: GoogleFonts.poppins()),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setLocalState(() => selectedCategory = value!);
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 28),
+                  Row(
                     children: [
-                      Text(
-                        'Plant a New Habit',
-                        style: GoogleFonts.poppins(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: CuteTheme.deepGreen,
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(CuteTheme.radiusMedium),
+                            ),
+                            side: const BorderSide(color: CuteTheme.borderLight),
+                          ),
+                          child: Text(
+                            'Maybe Later',
+                            style: GoogleFonts.poppins(color: CuteTheme.textMuted),
+                          ),
                         ),
                       ),
-                      Text(
-                        'Small steps, meaningful growth',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          color: CuteTheme.textMuted,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            if (titleController.text.isNotEmpty) {
+                              final authController =
+                              Provider.of<AuthController>(context, listen: false);
+                              final user = authController.currentUser;
+                              if (user == null) return;
+                              final habitController =
+                              Provider.of<HabitController>(context, listen: false);
+                              await habitController.createHabit(
+                                userId: user.uid,
+                                title: titleController.text,
+                                description: descController.text,
+                                category: selectedCategory,
+                              );
+                              if (context.mounted) Navigator.pop(context);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: CuteTheme.primaryGreen,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(CuteTheme.radiusMedium),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Plant Habit',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text('🌱', style: TextStyle(fontSize: 16)),
+                            ],
+                          ),
                         ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 16),
                 ],
               ),
-              const SizedBox(height: 28),
-              _buildInputField(
-                controller: titleController,
-                label: 'Habit Name',
-                hint: 'e.g., 5-minute breathing',
-                icon: Icons.edit_outlined,
-              ),
-              const SizedBox(height: 16),
-              _buildInputField(
-                controller: descController,
-                label: 'Why does this matter to you?',
-                hint: 'Optional, but helps with motivation',
-                icon: Icons.favorite_outline,
-                maxLines: 2,
-              ),
-              const SizedBox(height: 16),
-              StatefulBuilder(
-                builder: (context, setLocalState) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: CuteTheme.cream,
-                      borderRadius: BorderRadius.circular(CuteTheme.radiusMedium),
-                      border: Border.all(color: CuteTheme.borderLight),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: selectedCategory,
-                        isExpanded: true,
-                        icon: const Icon(Icons.expand_more, color: CuteTheme.textMuted),
-                        items: Constants.habitCategories.keys.map((category) {
-                          return DropdownMenuItem(
-                            value: category,
-                            child: Row(
-                              children: [
-                                CuteCategoryIcon(category: category, size: 24),
-                                const SizedBox(width: 12),
-                                Text(category, style: GoogleFonts.poppins()),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setLocalState(() => selectedCategory = value!);
-                        },
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 28),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(CuteTheme.radiusMedium),
-                        ),
-                        side: const BorderSide(color: CuteTheme.borderLight),
-                      ),
-                      child: Text(
-                        'Maybe Later',
-                        style: GoogleFonts.poppins(color: CuteTheme.textMuted),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        if (titleController.text.isNotEmpty) {
-                          final authController =
-                          Provider.of<AuthController>(context, listen: false);
-                          final user = authController.currentUser;
-                          if (user == null) return;
-                          final habitController =
-                          Provider.of<HabitController>(context, listen: false);
-                          await habitController.createHabit(
-                            userId: user.uid,
-                            title: titleController.text,
-                            description: descController.text,
-                            category: selectedCategory,
-                          );
-                          if (context.mounted) Navigator.pop(context);
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: CuteTheme.primaryGreen,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(CuteTheme.radiusMedium),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Plant Habit',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text('🌱', style: TextStyle(fontSize: 16)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-            ],
+            ),
           ),
-        ),
-      ),
+        )
     );
   }
 
@@ -627,9 +629,11 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
         child: InkWell(
           borderRadius: BorderRadius.circular(CuteTheme.radiusLarge),
           onTap: isCompleted ? null : () => _completeHabit(habit, habitController, gardenController),
+          onLongPress: () => _showHabitOptionsSheet(habit, habitController),
           child: Padding(
             padding: const EdgeInsets.all(18),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Stack(
                   clipBehavior: Clip.none,
@@ -670,15 +674,20 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
                           color: isCompleted ? CuteTheme.textMuted : CuteTheme.deepGreen,
                           decoration: isCompleted ? TextDecoration.lineThrough : null,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Text(
-                            habit.category,
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              color: CuteTheme.textMuted,
+                          Flexible(
+                            child: Text(
+                              habit.category,
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: CuteTheme.textMuted,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           if (habit.currentStreak > 0) ...[
@@ -706,28 +715,12 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
                               ),
                             ),
                           ],
-                          if (isRewarded && !isCompleted) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: CuteTheme.borderLight,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                'Rewarded',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 10,
-                                  color: CuteTheme.textMuted,
-                                ),
-                              ),
-                            ),
-                          ],
                         ],
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(width: 8),
                 if (!isCompleted)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -785,6 +778,313 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showHabitOptionsSheet(Habit habit, HabitController habitController) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: CuteTheme.cardBg,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(CuteTheme.radiusXLarge),
+            topRight: Radius.circular(CuteTheme.radiusXLarge),
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: CuteTheme.borderLight,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    CuteCategoryIcon(category: habit.category, size: 28),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        habit.title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: CuteTheme.deepGreen,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                if (!habit.isArchived)
+                  _buildOptionTile(
+                    icon: Icons.archive_outlined,
+                    label: 'Archive Habit',
+                    subtitle: 'Hide it but keep the history',
+                    color: CuteTheme.warmOrange,
+                    onTap: () async {
+                      Navigator.pop(context);
+                      final success = await habitController.archiveHabit(habit.id);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                Text(
+                                  success ? '📦' : '❌',
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    success
+                                        ? '"${habit.title}" archived~'
+                                        : 'Failed to archive habit',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            backgroundColor: success
+                                ? CuteTheme.warmOrange
+                                : CuteTheme.errorColor,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  CuteTheme.radiusSmall),
+                            ),
+                            margin: const EdgeInsets.all(16),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                _buildOptionTile(
+                  icon: Icons.delete_outline_rounded,
+                  label: 'Delete Habit',
+                  subtitle: 'Permanently remove this habit',
+                  color: CuteTheme.errorColor,
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showDeleteHabitDialog(habit, habitController);
+                  },
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionTile({
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(CuteTheme.radiusMedium),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(CuteTheme.radiusMedium),
+              border: Border.all(color: color.withValues(alpha: 0.15)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: color, size: 22),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: color,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: CuteTheme.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded, color: color.withValues(alpha: 0.5)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteHabitDialog(Habit habit, HabitController habitController) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(CuteTheme.radiusXLarge),
+        ),
+        backgroundColor: Colors.white,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: CuteTheme.errorColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Text('🥀', style: TextStyle(fontSize: 20)),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Delete this habit?',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '"${habit.title}"',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                color: CuteTheme.deepGreen,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'This will permanently remove the habit and all its history...',
+              style: GoogleFonts.poppins(
+                color: CuteTheme.textMuted,
+                height: 1.5,
+              ),
+            ),
+            if (habit.currentStreak > 0) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: CuteTheme.sunnyYellow.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const Text('🔥', style: TextStyle(fontSize: 16)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'You have a ${habit.currentStreak}-day streak!',
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: CuteTheme.warmOrange,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Keep it 💚',
+              style: GoogleFonts.poppins(color: CuteTheme.textMuted),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await habitController.deleteHabit(habit.id);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        Text(
+                          success ? '🍂' : '❌',
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            success
+                                ? 'Habit removed from your garden~'
+                                : 'Failed to delete. Please try again.',
+                          ),
+                        ),
+                      ],
+                    ),
+                    backgroundColor: success
+                        ? CuteTheme.textSecondary
+                        : CuteTheme.errorColor,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(CuteTheme.radiusSmall),
+                    ),
+                    margin: const EdgeInsets.all(16),
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: CuteTheme.errorColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(CuteTheme.radiusSmall),
+              ),
+            ),
+            child: Text(
+              'Delete',
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
       ),
     );
   }

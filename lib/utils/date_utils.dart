@@ -2,7 +2,6 @@
 
 import 'package:intl/intl.dart';
 
-/// 時間格式化
 class ThymeDateUtils {
   static String formatRelative(DateTime time) {
     final now = DateTime.now();
@@ -95,7 +94,6 @@ class ThymeDateUtils {
     return 'Good night 🌙';
   }
 
-  /// 簡單問候語
   static String getSimpleGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 6) return 'Hello';
@@ -105,19 +103,16 @@ class ThymeDateUtils {
     return 'Good night';
   }
 
-  /// 檢查是否今天
   static bool isToday(DateTime time) {
     final now = DateTime.now();
     return time.year == now.year && time.month == now.month && time.day == now.day;
   }
 
-  /// 檢查是否是昨天
   static bool isYesterday(DateTime time) {
     final yesterday = DateTime.now().subtract(const Duration(days: 1));
     return time.year == yesterday.year && time.month == yesterday.month && time.day == yesterday.day;
   }
 
-  /// 檢查是否是本周
   static bool isThisWeek(DateTime time) {
     final now = DateTime.now();
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
