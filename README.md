@@ -86,10 +86,6 @@ flutter pub get
 - Download `GoogleService-Info.plist`
 - Place it in `ios/Runner/GoogleService-Info.plist`
 
-5. Create the following Firestore composite index (required for Community Kindness):
-    - Collection: `kindness`
-    - Fields: `isPublic` (Ascending) + `createdAt` (Descending)
-
 ### Step 4 — Get a Gemini API Key (Free)
 
 1. Go to [Google AI Studio](https://aistudio.google.com/apikey)
@@ -104,6 +100,7 @@ flutter pub get
 ```bash
 # Development (with API key)
 flutter run --dart-define=GEMINI_API_KEY=YOUR_KEY_HERE
+flutter run --dart-define=COHERE_API_KEY=YOUR_KEY_HERE
 
 # Without API key (AI features will use offline fallback)
 flutter run
@@ -128,6 +125,7 @@ Go to **Run → Edit Configurations → Additional run args** and add:
 
 ```
 --dart-define=GEMINI_API_KEY=YOUR_KEY_HERE
+--dart-define=COHERE_API_KEY=YOUR_KEY_HERE
 ```
 
 ---
@@ -180,6 +178,7 @@ lib/
 │   ├── gentle_insights_service.dart   # Non-judgmental user insights
 │   ├── journal_prompts_service.dart   # Reflective journal prompts
 │   └── welcome_back_service.dart      # No-guilt return messages
+│   └── cohere_service.dart            # AI companion (Fern -- Fallback)
 ├── screens/
 │   ├── home_screen.dart
 │   ├── auth_screen.dart
